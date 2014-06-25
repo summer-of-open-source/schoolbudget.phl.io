@@ -7,3 +7,8 @@ Based on D3's Sequences sunburst example.
 For Users: http://schoolbudget.phl.io 
 For Developers: https://github.com/CfABrigadePhiladelphia/schoolbudget.phl.io
 http://codeforphilly.org/projects/Budget_Visualization
+
+
+### Github Pages
+
+You can view the github pages version of this site at [http://summer-of-open-source.github.io/schoolbudget.phl.io](http://summer-of-open-source.github.io/schoolbudget.phl.io)
