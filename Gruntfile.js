@@ -17,4 +17,6 @@ module.exports = function(grunt) {
 
   // Default task.
   grunt.loadNpmTasks('grunt-nodestatic');
+  grunt.registerTask('default', ['nodestatic']);
+
 };
