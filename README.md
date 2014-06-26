@@ -14,4 +14,4 @@ http://codeforphilly.org/projects/Budget_Visualization
 You can view the github pages version of this site at [http://summer-of-open-source.github.io/schoolbudget.phl.io](http://summer-of-open-source.github.io/schoolbudget.phl.io)
 
 
-School district data can be found at: http://webgui.phila.k12.pa.us/offices/o/open-data-initiative
+School district data is located at: http://webgui.phila.k12.pa.us/offices/o/open-data-initiative
