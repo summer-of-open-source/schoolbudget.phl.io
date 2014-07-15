@@ -21,3 +21,4 @@ You can view the github pages version of this site at [http://summer-of-open-sou
 
 
 School district data can be found at: http://webgui.phila.k12.pa.us/offices/o/open-data-initiative
+View the data in a [google doc](https://docs.google.com/spreadsheets/d/1oucqy2WGPNReuF-yArFgDANRdFRyOW0PJ_xYPCyEGd8/edit?usp=sharing).
