@@ -9,7 +9,8 @@ function parseCSV() {
         //callback.  Actions to take after csv file has been fully parsed
         function(dataArray) {
             //dataArray contains an array of objects, 1 for each row of the csv file
-            //object property names correspond to csv headings (FUNCTION, ACTIVITY_CODE, etc)
+            //object property names correspond to csv headings (FUNCTION, ACTIVITY_CODE, etc), 
+            //unless there's an accessor function involved
             console.log(dataArray.valueOf());
         });
 }
