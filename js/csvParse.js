@@ -1,13 +1,14 @@
 function parseCSV() {
-    console.log("in parseCSV");
+    var index = -1;
     return d3.csv("../data/budget-information-test.csv",
         //accessor.  Controls how data is structured as it's pulled in
         function(d) {
+            index++; //I'm pretty sure there's a better way to do this...
             return {
-                //  "ID": 1,
-                //  "Class": "NormalizedBudgetLine",
-                //  "Created": 1400189228,
-                //  "CreatorID": 1,
+                "ID": index,
+                "Class": "NormalizedBudgetLine",
+                "Created": Date.now(), //value in budget-list-normalized: 1400189228  looked like a time to me but I think I'm wrong.  Too many digits 
+                "CreatorID": 1,
                 "FunctionClass": d.FUNCTION_CLASS,
                 "FunctionClassName": d.FUNCTION_CLASS_NAME,
                 "FunctionGroup": d.FUNCTION_GROUP,
