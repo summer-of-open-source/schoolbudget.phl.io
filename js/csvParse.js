@@ -4,7 +4,8 @@ function parseCSV() {
         //accessor.  Controls how data is structured as it's pulled in
         function(d) {
             index++; //I'm pretty sure there's a better way to do this...
-            return makeNormalizedList(index, d);
+            return makeTreeNormalized(index, d);
+            //return makeNormalizedList(index, d);
         },
         //callback.  Actions to take after csv file has been fully parsed
         function(dataArray) {
@@ -43,4 +44,112 @@ function makeNormalizedList(index, d) {
     };
 }
 
+
+
+var keys = {
+    0: {
+        "name": "FUNCTION_CLASS_NAME",
+        "number": "FUNCTION_CLASS"
+    },
+    1: {
+        "name": "FUNCTION_GROUP_NAME",
+        "number": "FUNCTION_GROUP"
+    },
+    2: {
+        "name": "FUNCTION_NAME",
+        "number": "FUNCTION"
+    },
+    3: {
+        "name": "ACTIVITY",
+        "number": "ACTIVITY_CODE"
+    }
+};
+
+
+
+function makeTreeSimple(index, d) {
+
+
+
+}
+
+//where d is one row of elements in the csv doc
+function makeTreeNormalized(index, d) {
+
+    var tree = {
+        "name": "School District of Philadelphia Budget",
+        "yearCurrent": 2014,
+        "yearNext": 2015,
+        "children": []
+    };
+
+    makeTree(tree, searchKeys[1], d);
+
+}
+
+
+
+//for each row in document, makeTree should be called 4 times, once for each key
+function makeTree(parent, level, d) {
+    var nameKey = keys[level][name];
+    var name = d[nameKey];
+
+    //if there is not an element of this name in parent.children
+    if (!nodeExists(parent.children, name)) {
+        parent.children.push(makeNode(level, d)); //access that element, add new element to its children array
+    }
+
+    if (level < 3) { //if we haven't hit bottom yet
+        //call makeTree for next level
+        makeTree(parent.children, level++, d);
+    }
+}
+
+
+function makeNode(level, d) {
+    var newNode;
+
+    newNode = {
+        "name": d[keys[level][name]],
+        "code": d[keys[level][code]]
+    }
+
+    if (level < 3)
+        newNode.children = [];
+
+    return newNode;
+}
+
 var testData = parseCSV();
+
+//array is an array of objects
+//name is the name of the object we're looking for
+//returns true if it exists, false otherwise
+function nodeExists(array, property) {
+    if (!array) //if array is undefined
+        return false;
+
+    for (var i = 0; i < array.length; i++) {
+        if (array[i][property]) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+// var testArray = [{
+//     "name": "name1",
+//     "s": "s",
+//     "3": 0
+// }, {
+//     "l": "l",
+//     "name": "alphabet"
+// }, {
+//     "q": "q",
+//     "r": 10
+// }];
+
+// console.log(nodeExists(testArray, "seven"));
+// //now check it out in the console!!!
