@@ -90,7 +90,7 @@ function makeTreeNormalized(d) {
         "children": []
     };
 
-    makeTree(tree, 0, d);
+    tree["children"] = makeTree(tree, 0, d);
 
     console.log("tree after makeTree: ");
     console.log(tree);
@@ -104,18 +104,20 @@ function makeTreeNormalized(d) {
 function makeTree(parent, level, d) {
     var nameKey = keys[level]["name"];
     var name = d[nameKey];
+    var childrenArray = parent["children"];
 
     //if there is not an element of this name in parent.children
-    if (!nodeExists(parent["children"], name)) {
+    if (!nodeExists(childrenArray, name)) {
         //console.log("new node: " + makeNode(level, d));
-        parent["children"].push(makeNode(level, d)); //access that element, add new element to its children array
+        childrenArray.push(makeNode(level, d)); //access that element, add new element to its children array
     }
 
     if (level < 3) { //if we haven't hit bottom yet
         //call makeTree for next level
-        makeTree(parent["children"], level++, d);
+        childrenArray = makeTree(getNodeFromArray(childrenArray, "name", name), level + 1, d);
     }
 
+    return childrenArray;
 }
 
 function makeNode(level, d) {
@@ -139,7 +141,7 @@ function makeNode(level, d) {
 //name is the name of the object we're looking for
 //returns true if it exists, false otherwise
 function nodeExists(array, property) {
-    if (array.length < 1) //if array is undefined
+    if (!array || array.length < 1) //if array is undefined or empty
         return false;
 
     for (var i = 0; i < array.length; i++) {
@@ -152,7 +154,23 @@ function nodeExists(array, property) {
 }
 
 
+function getNodeFromArray(array, property, value) {
+    if (!nodeExists(array, property)) //if array is undefined or empty
+        throw new Error("lookupNode: array undefined, empty, or array doesn't exist");
+
+    for (var i = 0; i < array.length; i++) {
+        if (array[i][property] == value) {
+            return array[i];
+        }
+    }
+
+    throw new Error("lookupNode: match not found");
+    return null;
+}
+
 var testData = parseCSV();
+
+
 
 // var testArray = [{
 //     "name": "name1",
@@ -165,6 +183,19 @@ var testData = parseCSV();
 //     "q": "q",
 //     "r": 10
 // }];
+
+// console.log("should be true");
+// console.log(lookupNode(testArray, "name", "alphabet"));
+
+// // console.log("should be false or undefined");
+// // console.log(lookupNode(testArray, "lishio", "kjsdgfk"));
+
+// console.log("should be true");
+// console.log(lookupNode(testArray, "r", 10));
+
+// console.log("should be true");
+// console.log(lookupNode(testArray, "name", "name1"));
+
 
 // console.log(nodeExists(testArray, "seven"));
 // //now check it out in the console!!!
