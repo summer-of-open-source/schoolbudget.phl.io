@@ -85,8 +85,7 @@ function parseNestedCSV() {
         function(d) {
 
             if (debugIndex < 30) {
-                console.log("tree at iteration " + debugIndex);
-                console.log(tree.children);
+                console.log("tree at row " + debugIndex);
                 debugIndex++
             }
 
@@ -114,6 +113,9 @@ function growBranch(parent, level, d) {
 
     if (level < 3) { //if we haven't hit bottom yet
         //call makeTree for next level
+        childrenArray.forEach(function(element, index) {
+            console.log(element[index].name);
+        });
         childrenArray = growBranch(getNodeFromArray(childrenArray, "name", name), level + 1, d);
     }
 
