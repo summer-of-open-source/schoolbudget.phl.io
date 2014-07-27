@@ -3,9 +3,9 @@ function parseCSV() {
     return d3.csv("../data/budget-information-test.csv",
         //accessor.  Controls how data is structured as it's pulled in
         function(d) {
-            index++; //I'm pretty sure there's a better way to do this...
-            return makeTreeNormalized(index, d);
-            //return makeNormalizedList(index, d);
+            var test = makeTreeNormalized(d);
+            console.log(test);
+            return test;
         },
         //callback.  Actions to take after csv file has been fully parsed
         function(dataArray) {
@@ -15,6 +15,13 @@ function parseCSV() {
             console.log(dataArray.valueOf());
         });
 }
+
+//syntax inside d3.csv call
+
+// function(d){
+//     //index++; //I'm pretty sure there's a better way to do this...
+//     //return makeNormalizedList(index, d);
+// }
 
 function makeNormalizedList(index, d) {
     return {
@@ -49,19 +56,19 @@ function makeNormalizedList(index, d) {
 var keys = {
     0: {
         "name": "FUNCTION_CLASS_NAME",
-        "number": "FUNCTION_CLASS"
+        "code": "FUNCTION_CLASS"
     },
     1: {
         "name": "FUNCTION_GROUP_NAME",
-        "number": "FUNCTION_GROUP"
+        "code": "FUNCTION_GROUP"
     },
     2: {
         "name": "FUNCTION_NAME",
-        "number": "FUNCTION"
+        "code": "FUNCTION"
     },
     3: {
         "name": "ACTIVITY",
-        "number": "ACTIVITY_CODE"
+        "code": "ACTIVITY_CODE"
     }
 };
 
@@ -74,7 +81,7 @@ function makeTreeSimple(index, d) {
 }
 
 //where d is one row of elements in the csv doc
-function makeTreeNormalized(index, d) {
+function makeTreeNormalized(d) {
 
     var tree = {
         "name": "School District of Philadelphia Budget",
@@ -83,35 +90,43 @@ function makeTreeNormalized(index, d) {
         "children": []
     };
 
-    makeTree(tree, searchKeys[1], d);
+    makeTree(tree, 0, d);
 
+    console.log("tree after makeTree: ");
+    console.log(tree);
+
+    return tree;
 }
 
 
 
 //for each row in document, makeTree should be called 4 times, once for each key
 function makeTree(parent, level, d) {
-    var nameKey = keys[level][name];
+    var nameKey = keys[level]["name"];
     var name = d[nameKey];
 
     //if there is not an element of this name in parent.children
-    if (!nodeExists(parent.children, name)) {
-        parent.children.push(makeNode(level, d)); //access that element, add new element to its children array
+    if (!nodeExists(parent["children"], name)) {
+        //console.log("new node: " + makeNode(level, d));
+        parent["children"].push(makeNode(level, d)); //access that element, add new element to its children array
     }
 
     if (level < 3) { //if we haven't hit bottom yet
         //call makeTree for next level
-        makeTree(parent.children, level++, d);
+        makeTree(parent["children"], level++, d);
     }
-}
 
+}
 
 function makeNode(level, d) {
     var newNode;
 
+    var name = keys[level]["name"];
+    var code = keys[level]["code"];
+
     newNode = {
-        "name": d[keys[level][name]],
-        "code": d[keys[level][code]]
+        "name": d[name],
+        "code": d[code]
     }
 
     if (level < 3)
@@ -120,13 +135,11 @@ function makeNode(level, d) {
     return newNode;
 }
 
-var testData = parseCSV();
-
 //array is an array of objects
 //name is the name of the object we're looking for
 //returns true if it exists, false otherwise
 function nodeExists(array, property) {
-    if (!array) //if array is undefined
+    if (array.length < 1) //if array is undefined
         return false;
 
     for (var i = 0; i < array.length; i++) {
@@ -138,6 +151,8 @@ function nodeExists(array, property) {
     return false;
 }
 
+
+var testData = parseCSV();
 
 // var testArray = [{
 //     "name": "name1",
