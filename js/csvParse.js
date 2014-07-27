@@ -3,9 +3,7 @@ function parseCSV() {
     return d3.csv("../data/budget-information-test.csv",
         //accessor.  Controls how data is structured as it's pulled in
         function(d) {
-            var test = makeTreeNormalized(d);
-            console.log(test);
-            return test;
+            return makeTreeNormalized(d);
         },
         //callback.  Actions to take after csv file has been fully parsed
         function(dataArray) {
@@ -67,18 +65,11 @@ var keys = {
         "code": "FUNCTION"
     },
     3: {
-        "name": "ACTIVITY",
+        "name": "ACTIVITY_NAME",
         "code": "ACTIVITY_CODE"
     }
 };
 
-
-
-function makeTreeSimple(index, d) {
-
-
-
-}
 
 //where d is one row of elements in the csv doc
 function makeTreeNormalized(d) {
@@ -91,9 +82,6 @@ function makeTreeNormalized(d) {
     };
 
     tree["children"] = makeTree(tree, 0, d);
-
-    console.log("tree after makeTree: ");
-    console.log(tree);
 
     return tree;
 }
@@ -108,7 +96,6 @@ function makeTree(parent, level, d) {
 
     //if there is not an element of this name in parent.children
     if (!nodeExists(childrenArray, name)) {
-        //console.log("new node: " + makeNode(level, d));
         childrenArray.push(makeNode(level, d)); //access that element, add new element to its children array
     }
 
@@ -141,7 +128,7 @@ function makeNode(level, d) {
 //name is the name of the object we're looking for
 //returns true if it exists, false otherwise
 function nodeExists(array, property) {
-    if (!array || array.length < 1) //if array is undefined or empty
+    if (typeof array == undefined || array.length < 1) //if array is undefined or empty
         return false;
 
     for (var i = 0; i < array.length; i++) {
