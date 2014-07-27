@@ -1,25 +1,22 @@
-function parseCSV() {
+/**************   Normalized CSV Format   ***************/
+
+
+function parseNormalizedCSV() {
     var index = -1;
+
     return d3.csv("../data/budget-information-test.csv",
-        //accessor.  Controls how data is structured as it's pulled in
         function(d) {
-            return makeTreeNormalized(d);
+            index++; //I'm pretty sure there's a better way to do this...
+            return makeNormalizedList(index, d);
         },
         //callback.  Actions to take after csv file has been fully parsed
         function(dataArray) {
             //dataArray contains an array of objects, 1 for each row of the csv file
             //object property names correspond to csv headings (FUNCTION, ACTIVITY_CODE, etc), 
             //unless there's an accessor function involved
-            console.log(dataArray.valueOf());
+            console.log(dataArray);
         });
 }
-
-//syntax inside d3.csv call
-
-// function(d){
-//     //index++; //I'm pretty sure there's a better way to do this...
-//     //return makeNormalizedList(index, d);
-// }
 
 function makeNormalizedList(index, d) {
     return {
@@ -49,7 +46,10 @@ function makeNormalizedList(index, d) {
     };
 }
 
+//var normal = parseNormalizedCSV();
 
+
+/**************   Nested CSV Format   ***************/
 
 var keys = {
     0: {
@@ -71,9 +71,8 @@ var keys = {
 };
 
 
-//where d is one row of elements in the csv doc
-function makeTreeNormalized(d) {
-
+function parseNestedCSV() {
+    var debugIndex = 0;
     var tree = {
         "name": "School District of Philadelphia Budget",
         "yearCurrent": 2014,
@@ -81,15 +80,29 @@ function makeTreeNormalized(d) {
         "children": []
     };
 
-    tree["children"] = makeTree(tree, 0, d);
+    return d3.csv("../data/budget-information-test.csv",
+        //accessor.  Controls how data is structured as it's pulled in
+        function(d) {
 
-    return tree;
+            if (debugIndex < 30) {
+                console.log("tree at iteration " + debugIndex);
+                console.log(tree.children);
+                debugIndex++
+            }
+
+            tree["children"] = growBranch(tree, 0, d); //0 because we're starting at level/key 0
+        },
+        //callback.  Actions to take after csv file has been fully parsed
+        function(dataArray) {
+            console.log(tree);
+        });
+
 }
 
 
-
 //for each row in document, makeTree should be called 4 times, once for each key
-function makeTree(parent, level, d) {
+//returns the same parent node with any necessary changes made
+function growBranch(parent, level, d) {
     var nameKey = keys[level]["name"];
     var name = d[nameKey];
     var childrenArray = parent["children"];
@@ -101,7 +114,7 @@ function makeTree(parent, level, d) {
 
     if (level < 3) { //if we haven't hit bottom yet
         //call makeTree for next level
-        childrenArray = makeTree(getNodeFromArray(childrenArray, "name", name), level + 1, d);
+        childrenArray = growBranch(getNodeFromArray(childrenArray, "name", name), level + 1, d);
     }
 
     return childrenArray;
@@ -155,9 +168,7 @@ function getNodeFromArray(array, property, value) {
     return null;
 }
 
-var testData = parseCSV();
-
-
+var nested = parseNestedCSV();
 
 // var testArray = [{
 //     "name": "name1",
@@ -170,19 +181,3 @@ var testData = parseCSV();
 //     "q": "q",
 //     "r": 10
 // }];
-
-// console.log("should be true");
-// console.log(lookupNode(testArray, "name", "alphabet"));
-
-// // console.log("should be false or undefined");
-// // console.log(lookupNode(testArray, "lishio", "kjsdgfk"));
-
-// console.log("should be true");
-// console.log(lookupNode(testArray, "r", 10));
-
-// console.log("should be true");
-// console.log(lookupNode(testArray, "name", "name1"));
-
-
-// console.log(nodeExists(testArray, "seven"));
-// //now check it out in the console!!!
