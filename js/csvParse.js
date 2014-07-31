@@ -93,9 +93,12 @@ function parseNestedCSV() {
 
             var newNode = growBranch(tree, 0, d);
 
-            for(var=i; i < tree["children"].length; i++)
-                if(tree["children"][i]["name"] === d.("FUNCTION_CLASS_NAME"))
+            for(var i = 0; i < tree["children"].length; i++){
+                if(tree["children"][i]["name"] === d.FUNCTION_CLASS_NAME){
                     tree["children"][i] = newNode;
+                    break;
+                }
+            }
         },
         //callback.  Actions to take after csv file has been fully parsed
         function(dataArray) {
