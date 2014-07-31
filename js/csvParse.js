@@ -91,7 +91,11 @@ function parseNestedCSV() {
                 debugIndex++
             }
 
-            tree["children"] = tree["children"].push(growBranch(tree, 0, d)); //0 because we're starting at level/key 0
+            var newNode = growBranch(tree, 0, d);
+
+            for(var=i; i < tree["children"].length; i++)
+                if(tree["children"][i]["name"] === d.("FUNCTION_CLASS_NAME"))
+                    tree["children"][i] = newNode;
         },
         //callback.  Actions to take after csv file has been fully parsed
         function(dataArray) {
@@ -121,8 +125,13 @@ function growBranch(parent, level, d) {
 
         nextLevelParent = getNodeFromArray(siblingArray, "name", name); // gets parent for next level
         //siblingArray = siblingArray.children.push(growBranch(nextLevelParent, (level+1), d));
-        parent["children"].push(growBranch(nextLevelParent, (level+1), d));
-        //growBranch(nextLevelParent, (level+1), d)
+        //parent["children"].push(growBranch(nextLevelParent, (level+1), d));
+
+        /***** have to replace node in siblingArray, not append to it *****/
+        //iterates through, finds right sibling, replaces
+        for (var i = 0; i < siblingArray.length; i++)
+            if (siblingArray[i]["name"] === name)
+                siblingArray[i] = growBranch(nextLevelParent, (level+1), d);
     }
     return parent;
     //return siblingArray;
