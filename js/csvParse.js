@@ -51,6 +51,8 @@ function makeNormalizedList(index, d) {
 
 /**************   Nested CSV Format   ***************/
 
+
+var tree;
 var keys = {
     0: {
         "name": "FUNCTION_CLASS_NAME",
@@ -73,7 +75,7 @@ var keys = {
 
 function parseNestedCSV() {
     var debugIndex = 0;
-    var tree = {
+    tree = {
         "name": "School District of Philadelphia Budget",
         "yearCurrent": 2014,
         "yearNext": 2015,
@@ -89,7 +91,7 @@ function parseNestedCSV() {
                 debugIndex++
             }
 
-            tree["children"] = growBranch(tree, 0, d); //0 because we're starting at level/key 0
+            tree["children"] = tree["children"].push(growBranch(tree, 0, d)); //0 because we're starting at level/key 0
         },
         //callback.  Actions to take after csv file has been fully parsed
         function(dataArray) {
@@ -104,23 +106,35 @@ function parseNestedCSV() {
 function growBranch(parent, level, d) {
     var nameKey = keys[level]["name"];
     var name = d[nameKey];
-    var childrenArray = parent["children"];
+    var siblingArray = parent["children"];
+    var nextLevelParent;
 
     //if there is not an element of this name in parent.children
-    if (!nodeExists(childrenArray, name)) {
-        childrenArray.push(makeNode(level, d)); //access that element, add new element to its children array
+    if (!nodeExists(siblingArray, name)) {
+        siblingArray.push(makeNode(level, d)); //access that element, add new element to its children array
     }
+
 
     if (level < 3) { //if we haven't hit bottom yet
         //call makeTree for next level
-        childrenArray.forEach(function(element, index) {
-            console.log(element[index].name);
-        });
-        childrenArray = growBranch(getNodeFromArray(childrenArray, "name", name), level + 1, d);
-    }
+        //printNamesInArray(siblingArray);
 
-    return childrenArray;
+        nextLevelParent = getNodeFromArray(siblingArray, "name", name); // gets parent for next level
+        //siblingArray = siblingArray.children.push(growBranch(nextLevelParent, (level+1), d));
+        parent["children"].push(growBranch(nextLevelParent, (level+1), d));
+        //growBranch(nextLevelParent, (level+1), d)
+    }
+    return parent;
+    //return siblingArray;
+
 }
+
+function printNamesInArray(theArray){
+    theArray.forEach(function(element, index, array) {
+        console.log(element.name);
+    });
+}
+
 
 function makeNode(level, d) {
     var newNode;
@@ -147,7 +161,7 @@ function nodeExists(array, property) {
         return false;
 
     for (var i = 0; i < array.length; i++) {
-        if (array[i][property]) {
+        if (array[i][property]) {//if the element at array[i] contains a property that matches
             return true;
         }
     }
@@ -155,10 +169,10 @@ function nodeExists(array, property) {
     return false;
 }
 
-
+//returns node that contains the passed property
 function getNodeFromArray(array, property, value) {
-    if (!nodeExists(array, property)) //if array is undefined or empty
-        throw new Error("lookupNode: array undefined, empty, or array doesn't exist");
+    if (!nodeExists(array, property)) //if array is undefined or empty, or doesn't contain property 
+        throw new Error("lookupNode: array undefined, empty, or property does not exist");
 
     for (var i = 0; i < array.length; i++) {
         if (array[i][property] == value) {
@@ -166,20 +180,23 @@ function getNodeFromArray(array, property, value) {
         }
     }
 
-    throw new Error("lookupNode: match not found");
+    throw new Error("getNodeFromArray: match not found");
     return null;
 }
 
 var nested = parseNestedCSV();
 
-// var testArray = [{
-//     "name": "name1",
-//     "s": "s",
-//     "3": 0
-// }, {
-//     "l": "l",
-//     "name": "alphabet"
-// }, {
-//     "q": "q",
-//     "r": 10
-// }];
+
+
+
+var testArray = [{
+    "name": "name1",
+    "s": "s",
+    "3": 0
+}, {
+    "l": "l",
+    "name": "alphabet"
+}, {
+    "q": "q",
+    "r": 10
+}];
