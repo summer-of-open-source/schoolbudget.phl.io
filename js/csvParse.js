@@ -1,3 +1,5 @@
+var normal, nested;
+
 /**************   Normalized CSV Format   ***************/
 
 
@@ -14,6 +16,7 @@ function parseNormalizedCSV() {
             //dataArray contains an array of objects, 1 for each row of the csv file
             //object property names correspond to csv headings (FUNCTION, ACTIVITY_CODE, etc), 
             //unless there's an accessor function involved
+            console.log("********   NORMALIZED   ********");
             console.log(dataArray);
         });
 }
@@ -46,8 +49,7 @@ function makeNormalizedList(index, d) {
     };
 }
 
-//var normal = parseNormalizedCSV();
-
+normal = parseNormalizedCSV();
 
 /**************   Nested CSV Format   ***************/
 
@@ -74,6 +76,84 @@ var keys = {
 
 
 function parseNestedCSV() {
+    tree = {
+        "name": "School District of Philadelphia Budget",
+        "yearCurrent": 2014,
+        "yearNext": 2015,
+        "children": {}
+    };
+
+    return d3.csv("../data/budget-information-test.csv",
+        //accessor.  Controls how data is structured as it's pulled in
+        function(d) {
+            var key;
+            var nameKey00, nameKey01, nameKey02, nameKey03;
+            var siblings00, siblings01, siblings02, siblings03; //stores sibling arrays
+            var name00, name01, name02, name03;
+            var i = 0;
+
+            key = keys[i];
+            nameKey00 = key["name"];
+            siblings00 = tree["children"];//array containing level 0's children
+            name00 = d[nameKey00];
+
+            //if level 0 key node doesn't exist, add it
+            if (!siblings00[name00]){
+                tree["children"][name00] = makeNode(i, d); 
+            }
+
+
+            i++;
+            key = keys[i];
+            nameKey01 = key["name"];
+            siblings01 = tree["children"][name00]["children"];
+            name01 = d[nameKey01];
+
+            //if level 1 key node doesn't exist, add it
+            if (!siblings01[name01]){
+                tree["children"][name00]["children"][name01] = makeNode(i, d); 
+            }
+
+
+            i++;
+            key = keys[i];
+            nameKey02 = key["name"];
+            siblings02 = tree["children"][name00]["children"][name01]["children"];
+            name02 = d[nameKey02];
+
+            //if level 2 key node doesn't exist, add it
+            if (!siblings02[name02]){
+                tree["children"][name00]["children"][name01]["children"][name02] = makeNode(i, d);             }
+
+
+            i++;
+            key = keys[i];
+            nameKey03 = key["name"];
+            siblings03 = tree["children"][name00]["children"][name01]["children"][name02]["children"];
+            name03 = d[nameKey03];
+
+            //if level 3 key node doesn't exist, add it
+            if (!siblings03[name03]){
+                tree["children"][name00]["children"][name01]["children"][name02]["children"][name03] = makeNode(i, d); 
+            }
+
+
+        },
+        //callback.  Actions to take after csv file has been fully parsed
+        function(dataArray) {
+            console.log("********  NESTED TREE  *******");
+            console.log(tree);
+
+        });
+
+}
+
+nested = parseNestedCSV();
+
+/**** RECURSIVE NOT-SO-FUNCTIONAL SOLUTION  ****/
+
+
+function parseNestedCSVrecursive() {
     var debugIndex = 0;
     tree = {
         "name": "School District of Philadelphia Budget",
@@ -82,21 +162,21 @@ function parseNestedCSV() {
         "children": []
     };
 
-    return d3.csv("../data/budget-information-test.csv",
+    return d3.csv("../data/test-budget-small.csv",
         //accessor.  Controls how data is structured as it's pulled in
         function(d) {
 
-            if (debugIndex < 30) {
-                console.log("tree at row " + debugIndex);
-                debugIndex++
-            }
+            console.log("tree at row " + debugIndex);
+            debugIndex++;
 
-            var newNode = growBranch(tree, 0, d);
 
+            var newNode = growBranch(tree, 0, d); 
+
+            //loops through all children of tree 
             for(var i = 0; i < tree["children"].length; i++){
-                if(tree["children"][i]["name"] === d.FUNCTION_CLASS_NAME){
-                    tree["children"][i] = newNode;
-                    break;
+                if(tree["children"][i]["name"] === d.FUNCTION_CLASS_NAME){ //finds child with current FUNCTION_CLASS_NAME
+                    tree["children"][i] = newNode;//replaces it with the new node which has the current row of data's changes added
+                    break; //ends the loop
                 }
             }
         },
@@ -117,7 +197,7 @@ function growBranch(parent, level, d) {
     var nextLevelParent;
 
     //if there is not an element of this name in parent.children
-    if (!nodeExists(siblingArray, name)) {
+    if (!nodeExists(siblingArray, "name", name)) {
         siblingArray.push(makeNode(level, d)); //access that element, add new element to its children array
     }
 
@@ -160,7 +240,24 @@ function makeNode(level, d) {
     }
 
     if (level < 3)
-        newNode.children = [];
+        newNode.children = {}; //need an array here eventually
+    else{
+             newNode["current"] = {
+                "operating": +d.OPERATING_CYEST_LUMPSUM_AMT,
+                "grant": +d.GRANT_CYEST_LUMPSUM_AMT,
+                "capital": +d.CAPITAL_CYEST_LUMPSUM_AMT,
+                "other": +d.OTHER_CYEST_LUMPSUM_AMT,
+                "total": +d.CYEST_LUMPSUM_TOT
+            }
+
+            newNode["next"] = {
+                "operating": +d.OPERATING_ACT_LUMPSUM_AMT,
+                "grant": +d.GRANT_ACT_LUMPSUM_AMT,
+                "capital": +d.CAPITAL_ACT_LUMPSUM_AMT,
+                "other": +d.OTHER_ACT_LUMPSUM_AMT,
+                "total": +d.ACT_LUMPSUM_TOT
+                }
+    }
 
     return newNode;
 }
@@ -168,22 +265,22 @@ function makeNode(level, d) {
 //array is an array of objects
 //name is the name of the object we're looking for
 //returns true if it exists, false otherwise
-function nodeExists(array, property) {
+function nodeExists(array, property, value) {
     if (typeof array == undefined || array.length < 1) //if array is undefined or empty
         return false;
 
     for (var i = 0; i < array.length; i++) {
-        if (array[i][property]) {//if the element at array[i] contains a property that matches
+        if (array[i][property] === value ) {//if the element at array[i] contains a property that matches
             return true;
         }
     }
 
-    return false;
+    return false;  //array exists but node not found
 }
 
 //returns node that contains the passed property
 function getNodeFromArray(array, property, value) {
-    if (!nodeExists(array, property)) //if array is undefined or empty, or doesn't contain property 
+    if (!nodeExists(array, property, value)) //if array is undefined or empty, or doesn't contain property 
         throw new Error("lookupNode: array undefined, empty, or property does not exist");
 
     for (var i = 0; i < array.length; i++) {
@@ -195,10 +292,6 @@ function getNodeFromArray(array, property, value) {
     throw new Error("getNodeFromArray: match not found");
     return null;
 }
-
-var nested = parseNestedCSV();
-
-
 
 
 var testArray = [{
@@ -212,3 +305,4 @@ var testArray = [{
     "q": "q",
     "r": 10
 }];
+
