@@ -22,3 +22,13 @@ You can view the github pages version of this site at [http://summer-of-open-sou
 
 School district data can be found at: http://webgui.phila.k12.pa.us/offices/o/open-data-initiative
 View the data in a [google doc](https://docs.google.com/spreadsheets/d/1oucqy2WGPNReuF-yArFgDANRdFRyOW0PJ_xYPCyEGd8/edit?usp=sharing).
+
+==========
+Quick setup
+===========
+1. open terminal.
+2. clone repo.
+3. navigate to cloned folder
+4. run _python -m SimpleHTTPServer_
+5. Open Chrome Browser to http://0.0.0.0:8000
+6. Success!
