@@ -1,6 +1,5 @@
 /*global module:false*/
 module.exports = function(grunt) {
-
   // Project configuration.
   grunt.initConfig({
     // Metadata.
@@ -18,5 +17,6 @@ module.exports = function(grunt) {
   // Default task.
   grunt.loadNpmTasks('grunt-nodestatic');
   grunt.registerTask('default', ['nodestatic']);
+
 
 };

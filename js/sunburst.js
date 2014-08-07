@@ -3,19 +3,34 @@ var width = 750;
 var height = 600;
 var radius = Math.min(width, height) / 2;
 
-// Mapping of step names to colors.
-var colors = {
-    'F21001': '#53B4BF',    // Administrative Support Operations
-    'F21003': '#163033',    // School Budgets including Non-District Operated Schools
-    'F31330': '#ADBF00',    // L_ District Operated Schools - Instructional
-    'F41035': '#CFE600',    //    L_ Elementary K-8 Education
-    'F41063': '#DAEA46',    //    L_ Secondary Education
-    'F31350': '#BFD400',    // L_ District Operated Schools - Instructional Support
-    'F31360': '#738000',    // L_ District Operated Schools - Pupil - Family Support
-    'F31620': '#3A4000',    // L_ District Operated Schools - Operational Support
-    'F31361': '#326C73',    // L_ Non-District Operated Schools
+// Original apping of step names to colors.
+//var colors = {
+    //'F21001': '#53B4BF',    // Administrative Support Operations
+    //'F21003': '#163033',    // School Budgets including Non-District Operated Schools
+    //'F31330': '#ADBF00',    // L_ District Operated Schools - Instructional
+    //'F41035': '#CFE600',    //    L_ Elementary K-8 Education
+    //'F41063': '#DAEA46',    //    L_ Secondary Education
+    //'F31350': '#BFD400',    // L_ District Operated Schools - Instructional Support
+    //'F31360': '#738000',    // L_ District Operated Schools - Pupil - Family Support
+    //'F31620': '#3A4000',    // L_ District Operated Schools - Operational Support
+    //'F31361': '#326C73',    // L_ Non-District Operated Schools
   //'F49012': '#324359',    //    L_All Other Philadelphia Charters
-    'F41038': '#CB1E0A'     // L_ Debt Service
+    //'F41038': '#CB1E0A'     // L_ Debt Service
+//};
+
+// Retry mapping of step names to colors.
+var colors = {
+    'F21001': '#bbae9b',    // Administrative Support Operations = chalk
+    'F31361': '#d2c92c',    // School Budgets including Non-District Operated Schools = purple
+    'F31330': '#fb5500',    // L_ District Operated Schools - Instructional = orange
+    'F31350': '#522c19',    //      L_ District Operated Schools - Instructional Support = dark orange
+    'F31360': '#eb7e47',    //      L_ District Operated Schools - Pupil - Family Support = peach orange
+    'F31620': '#cc4500',    //      L_ District Operated Schools - Operational Support = middle orange
+    'F41035': '#00b1ff',    //    L_ Elementary K-8 Education = lighter blue
+    'F41063': '#1d4658',    //    L_ Secondary Education = blue
+    'F21003': '#670ce8',    // L_ Non-District Operated Schools = yellow
+  //'F49012': '#324359',    //    L_All Other Philadelphia Charters
+    'F41038': '#521317'     // L_ Debt Service = darker pink
 };
 
 var legendLabels = {};
