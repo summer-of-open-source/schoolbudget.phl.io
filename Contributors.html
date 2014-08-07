@@ -51,46 +51,18 @@
                 <!-- Email -->
                 <a href="mailto:?Subject=School District Budget&Body=School%20District%20Budget%20Visualization%20 http://schoolbudget.phl.io/"><img src="http://www.simplesharebuttons.com/images/somacro/email.png" alt="Email" /></a>
             </div>
-            <form>
-                <div>
-                    <span class="year-label">Estimated <span id="yearCurrent"></span> budget:</span>
-                    <label><input type="radio" name="fund" value="current.total" checked> Total    </label>
-                    <label><input type="radio" name="fund" value="current.operating"> Operating    </label>
-                    <label><input type="radio" name="fund" value="current.grant"> Grant    </label>
-                    <label><input type="radio" name="fund" value="current.capital"> Capital    </label>
-                    <label><input type="radio" name="fund" value="current.other"> Other</label>
-                </div>
-                <div>
-                    <span class="year-label">Proposed <span id="yearNext"></span> budget:</span>
-                    <label><input type="radio" name="fund" value="next.total"> Total    </label>
-                    <label><input type="radio" name="fund" value="next.operating"> Operating    </label>
-                    <label><input type="radio" name="fund" value="next.grant"> Grant    </label>
-                    <label><input type="radio" name="fund" value="next.capital"> Capital    </label>
-                    <label><input type="radio" name="fund" value="next.other"> Other</label>
-                </div>
-            </form>
+           
         </header>
 
-        <div id="main">
-            <div id="sequence"><ul class="crumbs"></ul><span class="total"></span></div>
-            <div id="chart">
-                <div id="explanation" style="visibility: hidden;">
-                    <div id="percentage"></div>
-                    <div id="total"></div>
-                    <div id="category"></div>
-                </div>
-            </div>
+          <!--   <div id="credits">
+                <p>Created by <a href="https://twitter.com/themightychris" target="_blank">Chris Alfano</a> &amp; <a href="https://twitter.com/laurenancona" target="_blank">Lauren Ancona</a> | a <a href="http://codeforphilly.org/projects/sdp_online_budget_visualization" target="_blank">Code for Philly</a> project</p>
+            </div> -->
             <div id="credits">
-                <a href="Contributors.html" target="_blank">Project Contributors</a>
-                <!-- <p>Created by <a href="https://github.com/themightychris" target="_blank">Chris Alfano</a>, <a href="https://github.com/laurenancona/" target="_blank">Lauren Ancona</a>, <a href="https://github.com/lillixia" target="_blank">Alexandra McFadden</a>, <a href="https://github.com/cfarm" target="_blank">Cat Farman</a>, <a href="https://github.com/tnbKristi" target="_blank">Kristi Centinaro</a>, <a href="https://github.com/yprabhu" target="_blank">Yash Prabhu</a>, <a href="https://github.com/livhaas" target="_blank">Olivia Haas</a>, <a href="https://github.com/arespicio" target="_blank">Ashleigh Respicio</a>, <a href="https://github.com/abernard1124" target="_blank">Ashley Bernard</a> &amp; <a href="https://github.com/JessicaBarnett" target="_blank">Jessica Barnett</a> <!--  <a href="https://github.com/goldvault" target="_blank"> Julia Soper</a> | --><!-- a <a href="http://codeforphilly.org/projects/sdp_online_budget_visualization" target="_blank">Code for Philly</a> project</p> --> 
+                <p>Created by <a href="https://github.com/themightychris" target="_blank">Chris Alfano</a>, <a href="https://github.com/laurenancona/" target="_blank">Lauren Ancona</a>, <a href="https://github.com/lillixia" target="_blank">Alexandra McFadden</a>, <a href="https://github.com/cfarm" target="_blank">Cat Farman</a>, <a href="https://github.com/tnbKristi" target="_blank">Kristi Centinaro</a>, <a href="https://github.com/yprabhu" target="_blank">Yash Prabhu</a>, <a href="https://github.com/livhaas" target="_blank">Olivia Haas</a>, <a href="https://github.com/arespicio" target="_blank">Ashleigh Respicio</a>, <a href="https://github.com/abernard1124" target="_blank">Ashley Bernard</a> &amp; <a href="https://github.com/JessicaBarnett" target="_blank">Jessica Barnett</a> <!--  <a href="https://github.com/goldvault" target="_blank"> Julia Soper</a> -->| a <a href="http://codeforphilly.org/projects/sdp_online_budget_visualization" target="_blank">Code for Philly</a> project</p>
             </div>
-        </div>
-        <div id="sidebar">
 
-            <ul id="legend"></ul>
-            <p class="note">Note: Undistributed budgetary adjustments and gap closing reductions are distributed for the purposes of this chart. <br><br> Source: <a href="http://webgui.phila.k12.pa.us/offices/o/open-data-initiative">SDP Open Data Initiative</a></p>
-        </div>
-        <script src="js/d3.min.js"></script>
-        <script src="js/sunburst.js"></script>
+   
+        
+        
     </body>
 </html>
