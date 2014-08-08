@@ -1,0 +1,45 @@
+@import url(http://fonts.googleapis.com/css?family=Fjalla+One|Merriweather);
+
+body{
+	font-family: 'Fjalla One', sans-serif;
+}
+
+h1,h2,h3,h4,h5{
+	font-family: 'Merriweather', serif;
+}
+
+
+#container{
+	margin: 0 auto;
+	max-width: 800px;
+}
+
+#chart, #key{
+	float: left;
+	min-height: 200px;
+	min-width: 200px;
+}
+
+#key{
+	margin-top: 120px;
+}
+
+.key-item {
+	padding: 10px;
+	margin-left: 30px;
+	color: #fff;
+	text-align: center;
+	margin-bottom: 10px;
+}
+
+.key-item,
+.item-value,
+.name,
+.revenue {
+  -webkit-transition: all 0.3s ease-out;
+  		  transition: all 0.3s ease-out;
+}
+
+.hidden {
+	display: none;
+}
