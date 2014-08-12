@@ -1,6 +1,4 @@
-{
-    "name": "School District of Philadelphia Budget",
-    "yearCurrent": 2014,
+{"yearCurrent": 2014,
     "yearNext": 2015,
     "children": [{
         "name": "School Budgets including Non-District Operated Schools",
