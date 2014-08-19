@@ -1,20 +1,20 @@
 
 /************ Nested CSV Formatter ************/
 
-var tree;
-var keys = {
-    0: {"name": "FUNCTION_CLASS_NAME",
-        "code": "FUNCTION_CLASS"         },
-    1: {"name": "FUNCTION_GROUP_NAME",
-        "code": "FUNCTION_GROUP"         },
-    2: {"name": "FUNCTION_NAME",
-        "code": "FUNCTION"               },
-    3: {"name": "ACTIVITY_NAME",
-        "code": "ACTIVITY_CODE"          }
-};
+//var tree;
+// var keys = {
+//     0: {"name": "FUNCTION_CLASS_NAME",
+//         "code": "FUNCTION_CLASS"         },
+//     1: {"name": "FUNCTION_GROUP_NAME",
+//         "code": "FUNCTION_GROUP"         },
+//     2: {"name": "FUNCTION_NAME",
+//         "code": "FUNCTION"               },
+//     3: {"name": "ACTIVITY_NAME",
+//         "code": "ACTIVITY_CODE"          }
+// };
 
 //makes a new object out of passed datum and returns it
-function makeNode(level, d) {
+function makeNode(level, d, keys) {
     var newNode;
 
     var name = keys[level]["name"];
@@ -55,10 +55,11 @@ function convertChildren(value, index, array){
     //convert this element's children to an array
     value["children"] = convertObjectToArray(value["children"]);
 
-    if(value["children"][0]["children"]){//if this element has children
-        //iterate through this element's children array; recursively call self each time
-        value["children"].forEach(convertChildren);
-    }
+        if(value["children"][0] && value["children"][0]["children"]){//if this element has children
+            //iterate through this element's children array; recursively call self each time
+            value["children"].forEach(convertChildren);
+        }
+
     return;
 }
 
@@ -75,6 +76,16 @@ function convertObjectToArray(obj){
 //main function.  parses/formats csv file.  
 //calls function main as a callback after data is formatted
 function parseNestedCSV() {
+    var keys = {
+        0: {"name": "FUNCTION_CLASS_NAME",
+            "code": "FUNCTION_CLASS"         },
+        1: {"name": "FUNCTION_GROUP_NAME",
+            "code": "FUNCTION_GROUP"         },
+        2: {"name": "FUNCTION_NAME",
+            "code": "FUNCTION"               },
+        3: {"name": "ACTIVITY_NAME",
+            "code": "ACTIVITY_CODE"          }
+    };
     tree = {
         // "name": "School District of Philadelphia Budget",
         "yearCurrent": 2014,
@@ -92,49 +103,49 @@ function parseNestedCSV() {
             var i = 0;
 
             key = keys[i];
-            nameKey00 = key["name"];
-            siblings00 = tree["children"];//array containing level 0's children
-            name00 = d[nameKey00];
+            // nameKey00 = key["name"];
+            // siblings00 = tree["children"];//array containing level 0's children
+            name00 = d[key["name"]];
 
             //if level 0 key node doesn't exist, add it
-            if (!siblings00[name00]){
-                tree["children"][name00] = makeNode(i, d); 
+            if (!tree["children"][name00]){
+                tree["children"][name00] = makeNode(i, d, keys); 
             }
 
 
             i++;
             key = keys[i];
-            nameKey01 = key["name"];
-            siblings01 = tree["children"][name00]["children"];
-            name01 = d[nameKey01];
+            // nameKey01 = key["name"];
+            // siblings01 = tree["children"][name00]["children"];
+            name01 = d[key["name"]];
 
             //if level 1 key node doesn't exist, add it
-            if (!siblings01[name01]){
-                tree["children"][name00]["children"][name01] = makeNode(i, d); 
+            if (!tree["children"][name00]["children"][name01]){
+                tree["children"][name00]["children"][name01] = makeNode(i, d, keys); 
             }
 
 
             i++;
             key = keys[i];
-            nameKey02 = key["name"];
-            siblings02 = tree["children"][name00]["children"][name01]["children"];
-            name02 = d[nameKey02];
+            // nameKey02 = key["name"];
+            // siblings02 = tree["children"][name00]["children"][name01]["children"];
+            name02 = d[key["name"]];
 
             //if level 2 key node doesn't exist, add it
-            if (!siblings02[name02]){
-                tree["children"][name00]["children"][name01]["children"][name02] = makeNode(i, d);
+            if (!tree["children"][name00]["children"][name01]["children"][name02]){
+                tree["children"][name00]["children"][name01]["children"][name02] = makeNode(i, d, keys);
              }
 
 
             i++;
             key = keys[i];
-            nameKey03 = key["name"];
-            siblings03 = tree["children"][name00]["children"][name01]["children"][name02]["children"];
-            name03 = d[nameKey03];
+            // nameKey03 = key["name"];
+            // siblings03 = tree["children"][name00]["children"][name01]["children"][name02]["children"];
+            name03 = d[key["name"]];
 
             //if level 3 key node doesn't exist, add it
-            if (!siblings03[name03]){
-                tree["children"][name00]["children"][name01]["children"][name02]["children"][name03] = makeNode(i, d); 
+            if (!tree["children"][name00]["children"][name01]["children"][name02]["children"][name03]){
+                tree["children"][name00]["children"][name01]["children"][name02]["children"][name03] = makeNode(i, d, keys); 
             }
 
         },
