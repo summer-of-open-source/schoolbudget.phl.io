@@ -1,22 +1,7 @@
-
 /***********************************************/
 /************ Budgetary Adjustments ************/
 /***********************************************/
 
-// extract gap closing cuts and undistributed budgetary adjustments
-// extractLines returns array of their totals
-// $gapClosingAmounts = $extractLines([
-//     ['Function' => 'F49992', 'ActivityCode' => '114A']  // Budget Reductions - Instructional & Instructional Support
-//     ,['Function' => 'F49995', 'ActivityCode' => '114C'] // Budget Reductions - Operating Support
-//     ,['Function' => 'F49994', 'ActivityCode' => '114E'] // Budget Reductions - Administration
-//     ,['Function' => 'F49991', 'ActivityCode' => '114B'] // Budget Reductions - Pupil & Family Support
-//     ,['Function' => 'F41073', 'ActivityCode' => '5999'] // Undistributed Budgetary Adjustments - Other
-//     ,['Function' => 'F41073', 'ActivityCode' => '5221'] // Undistributed Budgetary Adjustments - Other
-//     ,['Function' => 'F41073', 'ActivityCode' => '5130'] // Undistributed Budgetary Adjustments - Other
-//     ,['Function' => 'F41073', 'ActivityCode' => '2817'] // Undistributed Budgetary Adjustments - Other
-// ]);
-
-//note: activity code only actually shows in the document once...  do I even need the Function?
 var gapClosingAmounts = [{  "FUNCTION" : "F49992", "ACTIVITY_CODE" : "114A"    }, // Budget Reductions - Instructional & Instructional Support
                          {  "FUNCTION" : "F49995", "ACTIVITY_CODE" : "114C"    }, // Budget Reductions - Operating Support
                          {  "FUNCTION" : "F49994", "ACTIVITY_CODE" : "114E"    }, // Budget Reductions - Administration
@@ -27,164 +12,71 @@ var gapClosingAmounts = [{  "FUNCTION" : "F49992", "ACTIVITY_CODE" : "114A"    }
                          {  "FUNCTION" : "F41073", "ACTIVITY_CODE" : "2817"    }]; // Undistributed Budgetary Adjustments - Other
 
 
-// split up gap closing / undistributed budgetary adjustments for 
-// District Operated Schools and Administrative budget lines by SDP-estimated ratios
+
+var miscCodes = [   { 0: "F21003", 1: "F31620", 2: "F49000", 3: "5221", 4: "code" }, 
+                    { 0: "F21003", 1: "F31620", 2: "F41071", 3: "5221", 4: "code" }, 
+                    { 0: "F21005", 1: "F31999", 2: "F41073", 3: "2515", 4: "code" }, 
+                    { 0: "F21005", 1: "F31999", 2: "F41073", 3: "2520", 4: "code" }, 
+                    { 0: "F21005", 1: "F31999", 2: "F41073", 3: "2512", 4: "code" }, 
+                    { 0: "F21005", 1: "F31999", 2: "F41073", 3: "2519", 4: "code" }, 
+                ];
+
+//index corresponds to depth
+//index 4 contains the property that contains the values at 0-3
+var sampleQuery = { 0: "F21003", 
+                    1: "F31620", 
+                    2: "F49000", 
+                    3: "5221",
+                    4: "code"       } 
+//expected outcome: [0, 2, 3, 8]
+
+/*                 
+    // seaches each level's children array for a match, and stores the match's index.
+    // returns indices in an array
+    // takes an object in this format: 
+    //     {   0: value to search for at depth 0
+    //         1: value to search for at depth 1
+    //         2: value to search for at depth 2
+    //         3: value to search for at depth 3
+    //         4: optional: property that contains values above (ex "code", "name")
+    //     }
+    // if a 4th property is not passed in object, the property to search must be passed as a third argument
+*/
+function findPath(root, query, property){
+    if (!Array.isArray(root["children"]))
+        throw new Error("root's children properties must be converted to arrays.");
+
+    var i0, i1, i2, i3; //indices needed to access element
+    var prop = property || query[4]; 
+
+    for (i0=0; i0<root["children"].length; i0++)
+        if(root["children"][i0][prop] === query[0]){
+            break;
+    }
+
+    for (i1=0; i1<root["children"][i0]["children"].length; i1++)
+        if(root["children"][i0]["children"][i1][prop] === query[1]){
+            break;
+    }
+
+    for (i2=0; i2<root["children"][i0]["children"][i1]["children"].length; i2++)
+        if(root["children"][i0]["children"][i1]["children"][i2][prop] === query[2]){
+            break;
+    }
+
+    for (i3=0; i3<root["children"][i0]["children"][i1]["children"][i2]["children"].length; i3++)
+        if(root["children"][i0]["children"][i1]["children"][i2]["children"][i3][prop] === query[3]){
+            break;
+    }
+
+    return [i0, i1, i2, i3];
+}
 
 
-// split up gap closing / undistributed budgetary adjustments for District Operated Schools and Administrative budget lines by SDP-estimated ratios
-// $gapClosingAmountsSchools = array();
-// $gapClosingAmountsAdministrative = array();
+/************************************************/
+/************ Formatter Utilities ***************/
+/************************************************/
 
-// foreach ($gapClosingAmounts AS $column => $amount) {
-//     if (in_array($column, $valueColumnsCurrent)) {
-//         $gapClosingAmountsSchools[$column] = round($amount * 0.95183129854, 2); // 95.18% distribution of FY14 funds to schools
-//         $gapClosingAmountsAdministrative[$column] = $amount - $gapClosingAmountsSchools[$column];
-//     } elseif (in_array($column, $valueColumnsProposed)) {
-//         $gapClosingAmountsSchools[$column] = round($amount * 0.95441584049, 2); // 95.18% distribution of FY15 funds to schools
-//         $gapClosingAmountsAdministrative[$column] = $amount - $gapClosingAmountsSchools[$column];
-//     } else {
-//         throw new Exception('Unexpected column');
-//     }
-// }
-
-// // distribute split amounts
-// $distributeAmounts($gapClosingAmountsSchools, [
-//     ['FunctionGroup' => 'F31330']   // District Operated Schools - Instructional
-//     ,['FunctionGroup' => 'F31350']  // District Operated Schools - Instructional Support
-//     ,['FunctionGroup' => 'F31620', 'Function != "F41038"']  // District Operated Schools - Operational Support
-//     ,['FunctionGroup' => 'F31360']  // District Operated Schools - Pupil - Family Support
-// ]);
-
-// $distributeAmounts($gapClosingAmountsAdministrative, [
-//     ['FunctionClass' => 'F21001'] // Administrative Support Operations
-// ]);
-
-
-
-
-
-
-
-
-
-
-//*********** Misc adjustments *****************/
-
-
-// $distributeAmounts(
-//     $extractLines(['Function' => 'F49000', 'ActivityCode' => '5221']) // Food Service > Allocated Costs
-//     ,['FunctionGroup' => 'F31620', '(Function != "F41071" OR ActivityCode != "5221")', 'Function != "F41038"'] // Operating Support group, except Transportation -- Regular Services > Allocated Costs and Debt Service
-// );
-
-//line 211 import.php
-    //remove and total  
-        // Food Service > Allocated Costs
-        // key3 ACTIVITY_CODE 5221
-        // key2 FUNCTION F49000 Food Service
-    //distribute total to 
-        // Operating Support group, except Transportation -- Regular Services > Allocated Costs and Debt Service
-        // key1 FUNCTION_GROUP F31620
-        // NOT key2 FUNCTION F41071 
-        // NOT key3 ACTIVITY_CODE 5221
-        // NOT key2 FUNCTION F41038
-//remove
-// [{ "FUNCTION" : "F49000", "ACTIVITY_CODE" : "5221"}]
-
-//distribute
-
-
-
-/**************************************************************************/
-
-
-// $distributeAmounts(
-//     $extractLines(['Function' => 'F41071', 'ActivityCode' => '5221']) // Transportation -- Regular Services > Allocated Costs
-//     ,['Function' => 'F41071', 'ActivityCode != "5221"'] // Transportation -- Regular Services, except Allocated Costs
-// );
-
-//line 216 import.php
-    //remove and total 
-        // Transportation -- Regular Services > Allocated Costs
-        // key2 FUNCTION F41071
-        // key3 ACTIVITY_CODE 5221
-    //distribute total to  
-        // Transportation -- Regular Services, except Allocated Costs
-        // key2 FUNCTION F41071
-        // key3 ACTIVITY_CODE 5221
-
-/**************************************************************************/
-
-// $distributeAmounts(
-//     $extractLines(['Function' => 'F41073', 'ActivityCode' => '2515']) // Undistributed Budgetary Adjustments - Other > ACCOUNTING SERVICES
-//     ,['Function' => 'F49027'] // Accounting & Audit Coordination
-// );
-
-//line 221 import.php
-    //remove and total 
-        // Undistributed Budgetary Adjustments - Other > ACCOUNTING SERVICES
-        // key2 FUNCTION F41073
-        // key3 ACTIVITY_CODE 2515
-    //distribute total to  
-        // Accounting & Audit Coordination
-        // key2 FUNCTION F49027
-
-/**************************************************************************/
-
-
-// $distributeAmounts(
-//     $extractLines(['Function' => 'F41073', 'ActivityCode' => '2520']) // Undistributed Budgetary Adjustments - Other > CITY CONTROLLER
-//     ,['Function' => 'F41099'] // Financial Services Function
-// );
-
-//line 226 import.php
-    //remove and total 
-        // Undistributed Budgetary Adjustments - Other > CITY CONTROLLER
-        // key2 FUNCTION F41073
-        // key3 ACTIVITY_CODE 2520
-    //distribute total to  
-        // Financial Services Function
-        // key2 FUNCTION F41099
-
-
-/**************************************************************************/
-
-// $distributeAmounts(
-//     $extractLines(['Function' => 'F41073', 'ActivityCode' => '2512']) // Undistributed Budgetary Adjustments - Other > OFFICE OF MANAGEMENT & BUDGET
-//     ,['Function' => 'F49026'] // Management & Budget Office function
-// );
-
-//line 231 import.php
-    //remove and total 
-        // Undistributed Budgetary Adjustments - Other > OFFICE OF MANAGEMENT & BUDGET
-        // key2 FUNCTION F41073
-        // key3 ACTIVITY_CODE 2512
-    //distribute total to  
-        // Management & Budget Office function
-        // key2 FUNCTION F49026
-
-
-/**************************************************************************/
-
-// $distributeAmounts(
-//     $extractLines(['Function' => 'F41073', 'ActivityCode' => '2519']) // Undistributed Budgetary Adjustments - Other > OFFICE OF MANAGEMENT & BUDGET
-//     ,['Function' => 'F49026'] // Management & Budget Office function
-// );
-
-//line 236 import.php
-    //remove and total 
-        // Undistributed Budgetary Adjustments - Other > OFFICE OF MANAGEMENT & BUDGET
-        // key2 FUNCTION F41073
-        // key3 ACTIVITY_CODE 2519
-    //distribute total to  
-        // Management & Budget Office function
-        // key2 FUNCTION F49026
-
-
-/**************************************************************************/
-/**************************************************************************/
-
-
-/************ Nested CSV Formatter ************/
 
 //makes a new object out of passed datum and returns it
 function makeNode(level, d, keys) {
@@ -245,6 +137,11 @@ function convertObjectToArray(obj){
     }
     return arr;
 }
+
+
+/************************************************/
+/************ Nested CSV Formatter **************/
+/************************************************/
 
 //main function.  parses/formats csv file.  
 //calls function main as a callback after data is formatted
@@ -308,6 +205,11 @@ function parseNestedCSV() {
         function(dataArray) {
             convertChildren(tree, null, null);
             main(tree); //calling main here to ensure data will be assembled when it runs
+
+            console.log("**** findPath Tests ****");
+            for (var i = 0; i < miscCodes.length; i++){
+                console.log(findPath(tree, miscCodes[i]));
+            }
         });
 
     console.log("********  NESTED TREE  *******");
