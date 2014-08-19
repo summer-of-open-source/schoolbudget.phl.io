@@ -1,5 +1,7 @@
-//buckets for normalized and nested object lists
+//extraneous buckets for normalized and nested object lists
 var normal, nested;
+
+var root; //will be used in sunburst.js
 
 /********************************************************/
 /**************   Normalized CSV Format   ***************/
@@ -53,7 +55,7 @@ function makeNormalizedListItem(index, d) {
     };
 }
 
-normal = parseNormalizedCSV();
+// normal = parseNormalizedCSV();
 
 
 
@@ -163,7 +165,7 @@ function convertObjectToArray(obj){
 
 function parseNestedCSV() {
     tree = {
-        "name": "School District of Philadelphia Budget",
+        // "name": "School District of Philadelphia Budget",
         "yearCurrent": 2014,
         "yearNext": 2015,
         "children": {}
@@ -231,12 +233,13 @@ function parseNestedCSV() {
 
             console.log("********  NESTED TREE  *******");
             console.log(tree);
+
         });
 
     return tree;
 }
 
-nested = parseNestedCSV();
+root = parseNestedCSV();
 
 /**************   Adjustments    **************/
 
