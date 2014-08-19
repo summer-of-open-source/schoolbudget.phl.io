@@ -169,7 +169,7 @@ function parseNestedCSV() {
         "children": {}
     };
 
-    return d3.csv("../data/budget-information-test.csv",
+    d3.csv("../data/budget-information-test.csv",
         //accessor.  Controls how data is structured as it's pulled in
         function(d) {
             var key;
@@ -231,9 +231,9 @@ function parseNestedCSV() {
 
             console.log("********  NESTED TREE  *******");
             console.log(tree);
-
-            return tree;
         });
+
+    return tree;
 }
 
 nested = parseNestedCSV();
