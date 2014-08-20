@@ -18,7 +18,7 @@ var miscCodes = [   { 0: "F21003", 1: "F31620", 2: "F49000", 3: "5221", 4: "code
                     { 0: "F21005", 1: "F31999", 2: "F41073", 3: "2515", 4: "code" }, //[3, 0, 0, 4]
                     { 0: "F21005", 1: "F31999", 2: "F41073", 3: "2520", 4: "code" }, //[3, 0, 0, 3]
                     { 0: "F21005", 1: "F31999", 2: "F41073", 3: "2512", 4: "code" }, 
-                    { 0: "F21005", 1: "F31999", 2: "F41073", 3: "2519", 4: "code" }, //[3, 0, 0, 0]
+                    { 0: "F21005", 1: "F31999", 2: "F41073", 3: "2519", 4: "code" } //[3, 0, 0, 0]
                 ];
 
 // this method removes lines matching one of the supplied conditions and returns their totals
@@ -50,8 +50,11 @@ function extractLines(root, queries){
     console.log("total = " + nextTotals);  
     
     queries.forEach(function(value, index, array){ //second pass - removing properties
-        path = findPath(root, array[index]);
-        delete root["children"][path[0]]["children"][path[1]]["children"][path[2]]["children"][path[3]];
+        try{//because node may've been deleted already
+            path = findPath(root, array[index]);
+            root["children"][path[0]]["children"][path[1]]["children"][path[2]]["children"].splice(path[3], 1);
+        }
+        catch(e){}
     });
 }
 
@@ -192,14 +195,12 @@ function parseNestedCSV() {
         "yearNext": 2015,
         "children": {}
     };
-    var line = 0;
 
     d3.csv("../data/budget-information-test.csv",
         //accessor.  Controls how data is structured as it's pulled in
         function(d) {
-            line++;
-            if (d["FUNCTION"] === "F41073" && d["ACTIVITY_CODE"] === "2512")
-                console.log("breakpoint");
+            // if (d["FUNCTION"] === "F41073" && d["ACTIVITY_CODE"] === "2512")
+            //     console.log("breakpoint");
 
             var key;
             var name00, name01, name02, name03;
@@ -254,7 +255,7 @@ function parseNestedCSV() {
                 console.log(findPath(tree, miscCodes[i]));
             }
 
-            //extractLines(tree, miscCodes);
+            extractLines(tree, miscCodes);
         });
 
     console.log("********  NESTED TREE  *******");
