@@ -16,7 +16,7 @@ function makeNode(level, d, keys) {
     }
 
     if (level < 3)
-        newNode.children = {}; //need an array here eventually
+        newNode.children = {}; //will be converted to an array
     else{
              newNode["current"] = {
                 "operating": +d.OPERATING_CYEST_LUMPSUM_AMT,
@@ -86,8 +86,8 @@ function parseNestedCSV() {
     };
 
     d3.csv("../data/budget-information-test.csv",
-        //accessor.  Controls how data is structured as it's pulled in
-        function(d) {
+        //accessor.  Controls how data is structured as it's pulled in.  Runs once per line of data (d) in the csv.
+        function(d) { 
 
             var key;
             var name00, name01, name02, name03;
@@ -123,7 +123,7 @@ function parseNestedCSV() {
             if (!tree["children"][name00]["children"][name01]["children"][name02]["children"][name03]){
                 tree["children"][name00]["children"][name01]["children"][name02]["children"][name03] = makeNode(i, d, keys); 
             }
-            else{
+            else{ //there are some data items on the lowest level that share the same name as another.  On higher levels they would be nested.  here we have to just add them.
                 var l = 2; //I know the name exists 1 time, so start at 2
                 while(tree["children"][name00]["children"][name01]["children"][name02]["children"][name03.concat(l)]){
                     l++;
@@ -138,16 +138,23 @@ function parseNestedCSV() {
             main(tree); //calling main here to ensure data will be assembled when it runs
 
             //code for debugging adjustments
-            // console.log("**** findPath Tests ****");
-            // for (var i = 0; i < miscCodes.length; i++){
-            //     console.log(findPath(tree, miscCodes[i]));
-            // }
 
-            // extractLines(tree, miscCodes);
+            console.log("**** findPath Tests ****");
+            for (var i = 0; i < miscCodes.length; i++){
+                console.log(findPath(tree, miscCodes[i]));
+            }
+
+            console.log("**** extractLines Test ****");
+            console.log(extractLines(tree, miscCodes));
+
+            console.log("**** searchTree Test ****");
+            console.log(searchTree(tree, miscAdjust2[1]));
+            console.log(searchTree(tree, miscAdjust1[1]));
+
         });
 
     console.log("********  NESTED TREE  *******");
-    console.log(tree);
+    console.log(tree); 
     return tree;
 }
 
