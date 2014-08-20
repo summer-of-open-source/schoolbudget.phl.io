@@ -11,12 +11,12 @@ function Path(index0, index1, index2, index3){
     this[3] = index3
 }
 
-function PathQuery(prop0, prop1, prop2, prop3, prop){
+function PathQuery(prop0, prop1, prop2, prop3, propName){
     this[0] = prop0; //values to search for in prop
     this[1] = prop1;
     this[2] = prop2;
     this[3] = prop3;
-    this.prop = prop; //property that will contain values in 0-3
+    this.prop = propName; //property that will contain values in 0-3
 
     return this;
 }
@@ -30,8 +30,8 @@ function Exclusion(prop, val, depth){
 }
 
 //exclusions is an array of Exclusion objects
-function SearchQuery(prop0, prop1, prop2, prop3, prop, exclusions){
-    PathQuery.call(this, prop0, prop1, prop2, prop3, prop)
+function SearchQuery(prop0, prop1, prop2, prop3, propName, exclusions){
+    PathQuery.call(this, prop0, prop1, prop2, prop3, propName)
     this.exclusions = exclusions || [];
 
     return this;
@@ -39,7 +39,7 @@ function SearchQuery(prop0, prop1, prop2, prop3, prop, exclusions){
 
 /*******  Variables  *********/
 
-// for testing findPath func
+// for testing findPath and extractLines
 var miscCodes = [   new PathQuery("F21003", "F31620", "F49000", "5221", "code"), 
                     new PathQuery("F21003", "F31620", "F41071", "5221", "code"), 
                     new PathQuery("F21005", "F31999", "F41073", "2515", "code"), 
@@ -48,7 +48,16 @@ var miscCodes = [   new PathQuery("F21003", "F31620", "F49000", "5221", "code"),
                     new PathQuery("F21005", "F31999", "F41073", "2519", "code") 
                 ];
 
-//for testing extractLines func
+//for Testing searchTree 
+var searchCodes = [ new SearchQuery("F21001", "F49021", "F49027", "", "code"),
+                    new SearchQuery("F21001" , "F49015", "", "", "code"),
+                    new SearchQuery("F21001" , "", "", "", "code"),
+                    new SearchQuery("" , "", "", "", "code"), //should return paths of every element in tree
+                    new SearchQuery("F21003", "F31620", "F41071", "", "code", [new Exclusion("code", "5221", 3)]), 
+                    new SearchQuery("F21003", "F31620", "" , "", "code", [new Exclusion("code", "F41071", 2), new Exclusion("code", "5221", 3), new Exclusion("code", "F41038", 2)])
+                ];
+
+//needs to be converted to pathQuery objects
 var gapClosingAmounts = [{  "FUNCTION" : "F49992", "ACTIVITY_CODE" : "114A"    }, // Budget Reductions - Instructional & Instructional Support
                          {  "FUNCTION" : "F49995", "ACTIVITY_CODE" : "114C"    }, // Budget Reductions - Operating Support
                          {  "FUNCTION" : "F49994", "ACTIVITY_CODE" : "114E"    }, // Budget Reductions - Administration
@@ -129,101 +138,59 @@ function searchTree(root, searchQuery){
 //     [new Exclusion("code", "F41071", 2), new Exclusion("code", "5221", 3)], new Exclusion("code", "F41038", 2)]);
 
     var paths = [];
-    var i0, i1, i2, i3; //indices
-    var val0, val1, val2, val3;
-    var prop = searchQuery["prop"];
-
     var values = [];
-    var indices = new Path("", "", "", "", prop);
+    var indices = new Path("", "", "", "", searchQuery["prop"]);
 
-    //collect paths of all nodes that fit search criteria
-    if (searchQuery[0].length > 0){
-        // val0 = searchQuery[0];
-        // i0 = getIndex(prop, val0, root["children"]);
+    //needs access to searchQuery, indices, and paths
+    //recursively collects paths of all nodes that fit search criteria
+    function collectNestedPaths(value, index, array){
+        var depth = array[0].depth - 1; //-1 because the depth property starts at 1 not 0.
+        searchQuery[depth] = value[searchQuery["prop"]];
+
+        if (depth < 3){ //if this is not the lowest level
+            indices[depth] = getIndex(searchQuery["prop"], searchQuery[depth], array);
+            array[indices[depth]]["children"].forEach(collectNestedPaths);
+        }
+        else{ 
+            indices[depth] = getIndex(searchQuery["prop"], searchQuery[depth], array);
+            paths.push(new Path(indices[0], indices[1], indices[2], indices[3], searchQuery["prop"]));
+        }
+    }
+
+
+    //tests each index in searchQuery.  
+        //if there is a value, and this is the LAST ONE, create a path for that value and add it to paths
+        //If there is a value, and this ISN'T the LAST ONE, test the next value.
+        //else, if there is NO VALUE, add paths of all nested data items from that point down via collectNestedPaths
+    if (searchQuery[0].length > 0){ //get index for specific value
         indices[0] = getIndex(searchQuery["prop"], searchQuery[0], root["children"]);
-    }
-    else{
-        throw new Error("no value for depth 0");
-    }
 
+        if(searchQuery[1].length > 0){ 
+            indices[1] = getIndex(searchQuery["prop"], searchQuery[1], root["children"][indices[0]]["children"]);     
 
-    if(searchQuery[1].length > 0){
-        // val1 = searchQuery[1];
-        // i1 = getIndex(prop, val1, root["children"][i0]["children"]);
-
-        indices[1] = getIndex(searchQuery["prop"], searchQuery[1], root["children"][indices[0]]["children"]);        
-    }
-    else{
-        throw new Error("no value for depth 1");
-    }
-
-
-    if(searchQuery[2].length > 0){
-        // val2 = searchQuery[2];
-        // i2 = getIndex(prop, val2, root["children"][i0]["children"][i1]["children"]);
-
-        indices[2] = getIndex(searchQuery["prop"], searchQuery[2], root["children"][indices[0]]["children"][indices[1]]["children"]);
-    }
-    else{
-        //throw new Error("no value for depth 2");
-
-        root["children"][indices[0]]["children"][indices[1]]["children"].forEach(collectNestedPaths);
-
-        //iterate through next-to-last array and continue down the tree for each.
-        // root["children"][i0]["children"][i1]["children"].forEach(function(value, index, array){
-        //     val2 = value[prop];
-        //     i2 = getIndex(prop, val2, array);
-
-        //     indices[2] = getIndex(prop, val2, array);
-        //     //iterate through last array and make paths for each item
-        //     root["children"][i0]["children"][i1]["children"][i2]["children"].forEach(function(value, index, array){
-        //         val3 = value[prop];
-        //         i3 = getIndex(prop, val3, array);
-        //         paths.push(new Path(i0, i1, i2, i3, "code"));
-        //     });
-
-        // });
-    }
-
-
-    if(searchQuery[3].length > 0){ //get index for specific value
-        // val3 = searchQuery[3];
-        // i3 = getIndex(prop, val3, root["children"][i0]["children"][i1]["children"][i2]["children"]);
-
-        indices[3] = getIndex(searchQuery["prop"], searchQuery[3], root["children"][indices[0]]["children"][indices[1]]["children"][indices[2]]["children"]);
-    }
-    else{ //select ALL elements nested under the current path
-
-        root["children"][indices[0]]["children"][indices[1]]["children"][indices[2]]["children"].forEach(collectNestedPaths);
-        // root["children"][i0]["children"][i1]["children"][i2]["children"].forEach(function(value, index, array){
-        //     val3 = value[prop];
-        //     i3 = getIndex(prop, val3, array);
-
-        //     indices[3] = getIndex(prop, val3, root["children"][i0]["children"][i1]["children"][i2]["children"]);
-
-        //     paths.push(new Path(i0, i1, i2, i3, "code"));
-        // });
-    }
-
-    //use searchQuery[i] instead of val1 etc
-    //use indices[i] instead of i1 etc
-
-        //needs access to searchQuery, indices, and paths
-        function collectNestedPaths(value, index, array){
-            var depth = array[0].depth - 1; //-1 because the depth property starts at 1 not 0.
-            searchQuery[depth] = value[searchQuery["prop"]];
-
-            if (depth = 3){ //if this is the lowest level
-                indices[depth] = getIndex(searchQuery["prop"], searchQuery[depth], array);
-                paths.push(new Path(indices[0], indices[1], indices[2], indices[3], searchQuery["prop"]));
+            if(searchQuery[2].length > 0){ 
+                indices[2] = getIndex(searchQuery["prop"], searchQuery[2], root["children"][indices[0]]["children"][indices[1]]["children"]);
+                
+                    if(searchQuery[3].length > 0){ 
+                        indices[3] = getIndex(searchQuery["prop"], searchQuery[3], root["children"][indices[0]]["children"][indices[1]]["children"][indices[2]]["children"]);
+                    }
+                    else{ 
+                        root["children"][indices[0]]["children"][indices[1]]["children"][indices[2]]["children"].forEach(collectNestedPaths);
+                    }
             }
-            else{
-                indices[depth] = getIndex(searchQuery["prop"], searchQuery[depth], array[indices[depth-1]]["children"]);
-                array[depth]["children"].forEach(collectNestedPaths);
+            else{ 
+                root["children"][indices[0]]["children"][indices[1]]["children"].forEach(collectNestedPaths);
             }
+       
+        }
+        else{ 
+            root["children"][indices[0]]["children"].forEach(collectNestedPaths);
         }
 
-
+    }
+    else{ 
+        root["children"].forEach(collectNestedPaths);
+    }
 
     //second passes - one per exclusion
 

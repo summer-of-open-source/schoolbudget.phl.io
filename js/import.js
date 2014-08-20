@@ -148,8 +148,9 @@ function parseNestedCSV() {
             console.log(extractLines(tree, miscCodes));
 
             console.log("**** searchTree Test ****");
-            console.log(searchTree(tree, miscAdjust2[1]));
-            console.log(searchTree(tree, miscAdjust1[1]));
+            for (var i = 0; i < searchCodes.length; i++){
+                console.log(searchTree(tree, searchCodes[i]));
+            }
 
         });
 
