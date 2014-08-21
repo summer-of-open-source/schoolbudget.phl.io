@@ -2,7 +2,27 @@
 /************ Budgetary Adjustments ************/
 /***********************************************/
 
-//custom "data types" for formatting data to be passed to search functions
+//custom "data types" for formatting data that will be passed to search functions
+
+//stores path (indices 0-3) and 4-levels associated properties (specified by propNames array)
+function Datum(index0, index1, index2, index3, propNames, root){
+    Path.call(this, index0, index1, index2, index3);
+
+    if (Array.isArray(propNames) && root){
+        this.root = root;
+        for (var i = 0; i < propNames.length; i++){
+            this[propNames[i]] = {};
+            this.getDatumProperties(propNames[i], root["children"], 0); //goes down 4 levels and fetches property values at each
+        }
+    }
+}
+
+Datum.prototype.getDatumProperties = function(propName, array, depth){
+    this[propName][depth] = array[this[depth]][propName];
+    if (depth < 3)
+        this.getDatumProperties(propName, array[this[depth]]["children"], depth+1);
+}
+
 
 function Path(index0, index1, index2, index3){
     this[0] = index0,
@@ -49,12 +69,13 @@ var miscCodes = [   new PathQuery("F21003", "F31620", "F49000", "5221", "code"),
                 ];
 
 //for Testing searchTree 
-var searchCodes = [ new SearchQuery("F21001", "F49021", "F49027", "", "code"),
+var searchCodes = [ /*new SearchQuery("F21001", "F49021", "F49027", "", "code"),
                     new SearchQuery("F21001" , "F49015", "", "", "code"),
-                    new SearchQuery("F21001" , "", "", "", "code"),
-                    new SearchQuery("" , "", "", "", "code"), //should return paths of every element in tree
-                    new SearchQuery("F21003", "F31620", "F41071", "", "code", [new Exclusion("code", "5221", 3)]), 
-                    new SearchQuery("F21003", "F31620", "" , "", "code", [new Exclusion("code", "F41071", 2), new Exclusion("code", "5221", 3), new Exclusion("code", "F41038", 2)])
+                    new SearchQuery("F21001" , "", "", "", "code"),             
+                    new SearchQuery("" , "", "", "", "code"), //should return paths of every element in tree*/
+                    /*new SearchQuery("F21003", "F31620", "F41071", "", "code", [new Exclusion("name", "School Budgets including Non-District Operated Schools", 0)],*/
+                    new SearchQuery("F21003", "F31620", "F41071", "", "code", [new Exclusion("code", "2725", 3), new Exclusion("code", "2746", 3)]), 
+                    new SearchQuery("F21003", "F31620", "" , "", "code", [new Exclusion("code", "F41071", 2), new Exclusion("code", "5221", 3)])
                 ];
 
 //needs to be converted to pathQuery objects
@@ -104,20 +125,25 @@ var miscAdjust6 = [ new PathQuery("F21005", "F31999", "F41073", "2519", "code"),
 
 /******  Util functions  *******/
 
+
+//finds element in array with passed property:value pair 
+//returns index
 function getIndex(prop, val, array){
     for (var i=0; i<array.length; i++){
         if(array[i][prop] === val){
             return i;
         }
     }
-    throw new Error("value not found  -from getIndex with love")
+    console.log(new Error("value pair \""+prop+": "+val+"\" not found  -from getIndex with love"));
+    return -1;
 }
 
-// seaches each level's children array for a match, and stores the match's index.
-// accepts a PathQuery object.  returns 4 indices in an array
+// seaches each children array in every level of root.  
+// matches query's prop:val pairs for each level, and stores the match's index.
+// accepts a PathQuery object.  returns Path object
 function findPath(root, query){
     if (!Array.isArray(root["children"]))
-        throw new Error("root's children properties must be converted to arrays before findPath can be called.");
+        throw new Error("root's children properties must be converted to arrays before findPath can be called. -from findPath with love");
 
     var i0, i1, i2, i3; //indices needed to access element
     var prop = query["prop"]; 
@@ -127,22 +153,29 @@ function findPath(root, query){
     i2 = getIndex(prop, query[2], root["children"][i0]["children"][i1]["children"]);
     i3 = getIndex(prop, query[3], root["children"][i0]["children"][i1]["children"][i2]["children"]);
 
-    //return [i0, i1, i2, i3];
+    //return [i0, i1, i2, i3]; //I like the array version, but with the Path object, it's obvious that it's a path.
     return new Path(i0, i1, i2, i3);
 }
 
 //searches tree for all nodes matching passed critera
 //returns array of paths(4-element arrays of indices) that fit the criteria
 function searchTree(root, searchQuery){
-// new SearchQuery("F21003", "F31620", "" , "", "code", 
-//     [new Exclusion("code", "F41071", 2), new Exclusion("code", "5221", 3)], new Exclusion("code", "F41038", 2)]);
 
     var paths = [];
     var values = [];
     var indices = new Path("", "", "", "", searchQuery["prop"]);
+    var exclusions, typesExcluded = [];
+
+    //ensures that whatever types are going to be excluded will be included in datum objects for testing
+    searchQuery.exclusions.forEach(function(value, index, array){
+        typesExcluded.push(value.prop);
+    });
+
+
+    //***  first pass: makes a Datum object for each match in root, and adds it to paths  ***//
 
     //needs access to searchQuery, indices, and paths
-    //recursively collects paths of all nodes that fit search criteria
+    //recursively collects paths of all children/grandchildren/etc of passed value
     function collectNestedPaths(value, index, array){
         var depth = array[0].depth - 1; //-1 because the depth property starts at 1 not 0.
         searchQuery[depth] = value[searchQuery["prop"]];
@@ -153,16 +186,15 @@ function searchTree(root, searchQuery){
         }
         else{ 
             indices[depth] = getIndex(searchQuery["prop"], searchQuery[depth], array);
-            paths.push(new Path(indices[0], indices[1], indices[2], indices[3], searchQuery["prop"]));
+            paths.push(new Datum(indices[0], indices[1], indices[2], indices[3], typesExcluded, root));
         }
     }
-
 
     //tests each index in searchQuery.  
         //if there is a value, and this is the LAST ONE, create a path for that value and add it to paths
         //If there is a value, and this ISN'T the LAST ONE, test the next value.
         //else, if there is NO VALUE, add paths of all nested data items from that point down via collectNestedPaths
-    if (searchQuery[0].length > 0){ //get index for specific value
+    if (searchQuery[0].length > 0){ 
         indices[0] = getIndex(searchQuery["prop"], searchQuery[0], root["children"]);
 
         if(searchQuery[1].length > 0){ 
@@ -188,11 +220,25 @@ function searchTree(root, searchQuery){
         }
 
     }
-    else{ 
+    else{ //gets paths of all nested children
         root["children"].forEach(collectNestedPaths);
     }
 
-    //second passes - one per exclusion
+
+
+    //****  Second pass:  iterates all exclusions and removes matches from paths
+
+    searchQuery["exclusions"].forEach(function(value, index, element){//for each exclusion in list...
+        var exclusion = value;  //Exclusion object: prop, val, depth  
+
+        paths.forEach(function(value, index, array){//for each path, find ones that match exclusion and remove them
+            var datum = value;
+
+            if (datum[exclusion.prop][exclusion.depth] === exclusion.val)
+                paths.splice(index, 1);
+        });
+
+    });
 
     return paths;
 }

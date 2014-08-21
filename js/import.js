@@ -2,6 +2,7 @@
 /************ Formatter Utilities ***************/
 /************************************************/
 
+var tree;
 
 //makes a new object out of passed datum and returns it
 function makeNode(level, d, keys) {
@@ -147,6 +148,13 @@ function parseNestedCSV() {
             console.log("**** extractLines Test ****");
             console.log(extractLines(tree, miscCodes));
 
+            console.log("***** Datum object tests ******")
+            var datums = [  new Datum(0, 2, 3, 7, ["code", "name"], tree),
+                            new Datum(3, 0, 0, 3, ["code", "name", "depth"], tree), 
+                            new Datum(3, 0, 0, 0, ["code", "name"], tree)
+            ];
+            console.log(datums);
+
             console.log("**** searchTree Test ****");
             for (var i = 0; i < searchCodes.length; i++){
                 console.log(searchTree(tree, searchCodes[i]));
@@ -159,6 +167,6 @@ function parseNestedCSV() {
     return tree;
 }
 
-parseNestedCSV();
+tree = parseNestedCSV();
 
 
