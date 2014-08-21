@@ -138,27 +138,7 @@ function parseNestedCSV() {
             convertChildren(tree, null, null);
             main(tree); //calling main here to ensure data will be assembled when it runs
 
-            //code for debugging adjustments
-
-            console.log("**** findPath Tests ****");
-            for (var i = 0; i < miscCodes.length; i++){
-                console.log(findPath(tree, miscCodes[i]));
-            }
-
-            console.log("**** extractLines Test ****");
-            console.log(extractLines(tree, miscCodes));
-
-            console.log("***** Datum object tests ******")
-            var datums = [  new Datum(0, 2, 3, 7, ["code", "name"], tree),
-                            new Datum(3, 0, 0, 3, ["code", "name", "depth"], tree), 
-                            new Datum(3, 0, 0, 0, ["code", "name"], tree)
-            ];
-            console.log(datums);
-
-            console.log("**** searchTree Test ****");
-            for (var i = 0; i < searchCodes.length; i++){
-                console.log(searchTree(tree, searchCodes[i]));
-            }
+            runTests();
 
         });
 

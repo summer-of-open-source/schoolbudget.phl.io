@@ -2,11 +2,65 @@
 /************ Budgetary Adjustments ************/
 /***********************************************/
 
+function Path(index0, index1, index2, index3){
+    this[0] = index0,
+    this[1] = index1,
+    this[2] = index2,
+    this[3] = index3
+}
+
+// //exclusions is an array of Exclusion objects
+// function SearchQuery(prop0, prop1, prop2, prop3, propName, exclusions){
+//     PathQuery.call(this, prop0, prop1, prop2, prop3, propName)
+//     this.exclusions = exclusions || [];
+
+//     return this;
+// }
+
+// function PathQuery(prop0, prop1, prop2, prop3, propName){
+//     this[0] = prop0; //values to search for in prop
+//     this[1] = prop1;
+//     this[2] = prop2;
+//     this[3] = prop3;
+//     this.prop = propName; //property that will contain values in 0-3
+
+//     return this;
+// }
+
 //custom "data types" for formatting data that will be passed to search functions
+//in future: SIMPLIFY!!  how about just a datum object and a query object?
+
+//contains a property name and its values over 4 levels
+function Query(val1, val2, val3, val4, prop){
+    this[0] = val1;
+    this[1] = val2;
+    this[2] = val3;
+    this[3] = val4;
+
+    if (Array.isArray(prop))
+        this[prop] = prop;
+    else
+        this[prop] = [prop];
+
+    return this;
+}
+
+//contains information about an exclusion
+function Exclusion(prop, val, depth){
+    this.prop = prop;
+    this.val = val;
+    this.depth = depth;
+
+    return this;
+}
 
 //stores path (indices 0-3) and 4-levels associated properties (specified by propNames array)
 function Datum(index0, index1, index2, index3, propNames, root){
-    Path.call(this, index0, index1, index2, index3);
+    //Path.call(this, index0, index1, index2, index3);
+    this[0] = index0,
+    this[1] = index1,
+    this[2] = index2,
+    this[3] = index3
 
     if (Array.isArray(propNames) && root){
         this.root = root;
@@ -15,6 +69,8 @@ function Datum(index0, index1, index2, index3, propNames, root){
             this.getDatumProperties(propNames[i], root["children"], 0); //goes down 4 levels and fetches property values at each
         }
     }
+
+    return this;
 }
 
 Datum.prototype.getDatumProperties = function(propName, array, depth){
@@ -24,101 +80,42 @@ Datum.prototype.getDatumProperties = function(propName, array, depth){
 }
 
 
-function Path(index0, index1, index2, index3){
-    this[0] = index0,
-    this[1] = index1,
-    this[2] = index2,
-    this[3] = index3
-}
-
-function PathQuery(prop0, prop1, prop2, prop3, propName){
-    this[0] = prop0; //values to search for in prop
-    this[1] = prop1;
-    this[2] = prop2;
-    this[3] = prop3;
-    this.prop = propName; //property that will contain values in 0-3
-
-    return this;
-}
-
-function Exclusion(prop, val, depth){
-    this.prop = prop;
-    this.val = val;
-    this.depth = depth;
-
-    return this;
-}
-
-//exclusions is an array of Exclusion objects
-function SearchQuery(prop0, prop1, prop2, prop3, propName, exclusions){
-    PathQuery.call(this, prop0, prop1, prop2, prop3, propName)
-    this.exclusions = exclusions || [];
-
-    return this;
-}
 
 /*******  Variables  *********/
-
-// for testing findPath and extractLines
-var miscCodes = [   new PathQuery("F21003", "F31620", "F49000", "5221", "code"), 
-                    new PathQuery("F21003", "F31620", "F41071", "5221", "code"), 
-                    new PathQuery("F21005", "F31999", "F41073", "2515", "code"), 
-                    new PathQuery("F21005", "F31999", "F41073", "2520", "code"), 
-                    new PathQuery("F21005", "F31999", "F41073", "2512", "code"), 
-                    new PathQuery("F21005", "F31999", "F41073", "2519", "code") 
-                ];
-
-//for Testing searchTree 
-var searchCodes = [ /*new SearchQuery("F21001", "F49021", "F49027", "", "code"),
-                    new SearchQuery("F21001" , "F49015", "", "", "code"),
-                    new SearchQuery("F21001" , "", "", "", "code"),             
-                    new SearchQuery("" , "", "", "", "code"), //should return paths of every element in tree*/
-                    /*new SearchQuery("F21003", "F31620", "F41071", "", "code", [new Exclusion("name", "School Budgets including Non-District Operated Schools", 0)],*/
-                    new SearchQuery("F21003", "F31620", "F41071", "", "code", [new Exclusion("code", "2725", 3), new Exclusion("code", "2746", 3)]), 
-                    new SearchQuery("F21003", "F31620", "" , "", "code", [new Exclusion("code", "F41071", 2), new Exclusion("code", "5221", 3)])
-                ];
-
-//needs to be converted to pathQuery objects
-var gapClosingAmounts = [{  "FUNCTION" : "F49992", "ACTIVITY_CODE" : "114A"    }, // Budget Reductions - Instructional & Instructional Support
-                         {  "FUNCTION" : "F49995", "ACTIVITY_CODE" : "114C"    }, // Budget Reductions - Operating Support
-                         {  "FUNCTION" : "F49994", "ACTIVITY_CODE" : "114E"    }, // Budget Reductions - Administration
-                         {  "FUNCTION" : "F49991", "ACTIVITY_CODE" : "114B"    }, // Budget Reductions - Pupil & Family Support
-                         {  "FUNCTION" : "F41073", "ACTIVITY_CODE" : "5999"    }, // Undistributed Budgetary Adjustments - Other
-                         {  "FUNCTION" : "F41073", "ACTIVITY_CODE" : "5221"    }, // Undistributed Budgetary Adjustments - Other
-                         {  "FUNCTION" : "F41073", "ACTIVITY_CODE" : "5130"    }, // Undistributed Budgetary Adjustments - Other
-                         {  "FUNCTION" : "F41073", "ACTIVITY_CODE" : "2817"    }]; // Undistributed Budgetary Adjustments - Other
 
 //note: 
 //first element = element to be totaled & replaced
 //second element = elements which will receive distributed total
 //third+ element = exclusions that apply to 
 
-var miscAdjust1 = [ new PathQuery("F21003", "F31620", "F49000", "5221", "code"), // Food Service > Allocated Costs
-                    new SearchQuery("F21003", "F31620", "" , "", "code", 
-                        [new Exclusion("code", "F41071", 2), new Exclusion("code", "5221", 3)], new Exclusion("code", "F41038", 2) 
-                    )];// Operating Support group, except Transportation -- Regular Services > Allocated Costs and Debt Service
+var miscAdjust1 = [ new Query("F21003", "F31620", "F49000", "5221", "code"), // Food Service > Allocated Costs
+                    new Query("F21003", "F31620", "" , "", "code"), 
+                    new Exclusion("code", "F41071", 2), 
+                    new Exclusion("code", "5221", 3), 
+                    new Exclusion("code", "F41038", 2) 
+                ];// Operating Support group, except Transportation -- Regular Services > Allocated Costs and Debt Service
 // distribute to: everything w/ function group F31620 but NOT if it has FUNCTION F41071 or ACTIVITY_CODE 5221 or FUNCTION F41038
 
-var miscAdjust2 = [ new PathQuery("F21003", "F31620", "F41071", "5221", "code"), // Transportation -- Regular Services > Allocated Costs
-                    new SearchQuery("F21003", "F31620", "F41071", "", "code", 
-                        [new Exclusion("code", "5221", 3)]  
-                    )];// Transportation -- Regular Services, except Allocated Costs
+var miscAdjust2 = [ new Query("F21003", "F31620", "F41071", "5221", "code"), // Transportation -- Regular Services > Allocated Costs
+                    new Query("F21003", "F31620", "F41071", "", "code"), 
+                    new Exclusion("code", "5221", 3)
+                ];// Transportation -- Regular Services, except Allocated Costs
 //distribute to: everything with FUNCTION F41071, unless it has ACTIVITY_CODE 5221
 
-var miscAdjust3 = [ new PathQuery("F21005", "F31999", "F41073", "2515", "code"), // Undistributed Budgetary Adjustments - Other > ACCOUNTING SERVICES
-                    new SearchQuery("F21001", "F49021", "F49027", "", "code")]; // Accounting & Audit Coordination
+var miscAdjust3 = [ new Query("F21005", "F31999", "F41073", "2515", "code"), // Undistributed Budgetary Adjustments - Other > ACCOUNTING SERVICES
+                    new Query("F21001", "F49021", "F49027", "", "code")]; // Accounting & Audit Coordination
 //distribute to: everything with FUNCTION F49027
 
-var miscAdjust4 =[  new PathQuery("F21005", "F31999", "F41073", "2520", "code"), // Undistributed Budgetary Adjustments - Other > CITY CONTROLLER
-                    new SearchQuery("F21001" , "F49015", "F41009", "", "code")]; // Financial Services Function
+var miscAdjust4 =[  new Query("F21005", "F31999", "F41073", "2520", "code"), // Undistributed Budgetary Adjustments - Other > CITY CONTROLLER
+                    new Query("F21001" , "F49015", "F41009", "", "code")]; // Financial Services Function
 //distribute to everything with FUNCTION F41009
 
-var miscAdjust5 =[  new PathQuery("F21005", "F31999", "F41073", "2512", "code"), // Undistributed Budgetary Adjustments - Other > OFFICE OF MANAGEMENT & BUDGET
-                    new SearchQuery("F21001", "F9021", "F49026", "", "code")];// Management & Budget Office function
+var miscAdjust5 =[  new Query("F21005", "F31999", "F41073", "2512", "code"), // Undistributed Budgetary Adjustments - Other > OFFICE OF MANAGEMENT & BUDGET
+                    new Query("F21001", "F9021", "F49026", "", "code")];// Management & Budget Office function
 //distribute to: everything with FUNCTION F49026
 
-var miscAdjust6 = [ new PathQuery("F21005", "F31999", "F41073", "2519", "code"), // Undistributed Budgetary Adjustments - Other > OFFICE OF MANAGEMENT & BUDGET
-                    new SearchQuery("F21001", "F9021", "F49026", "", "code")];// Management & Budget Office function
+var miscAdjust6 = [ new Query("F21005", "F31999", "F41073", "2519", "code"), // Undistributed Budgetary Adjustments - Other > OFFICE OF MANAGEMENT & BUDGET
+                    new Query("F21001", "F9021", "F49026", "", "code")];// Management & Budget Office function
 //distribute to: everything with FUNCTION F49026
 
 
@@ -140,8 +137,7 @@ function getIndex(prop, val, array){
 
 // seaches each children array in every level of root.  
 // matches query's prop:val pairs for each level, and stores the match's index.
-// accepts a PathQuery object.  returns Path object
-function findPath(root, query){
+function find(root, query){
     if (!Array.isArray(root["children"]))
         throw new Error("root's children properties must be converted to arrays before findPath can be called. -from findPath with love");
 
@@ -153,21 +149,37 @@ function findPath(root, query){
     i2 = getIndex(prop, query[2], root["children"][i0]["children"][i1]["children"]);
     i3 = getIndex(prop, query[3], root["children"][i0]["children"][i1]["children"][i2]["children"]);
 
-    //return [i0, i1, i2, i3]; //I like the array version, but with the Path object, it's obvious that it's a path.
     return new Path(i0, i1, i2, i3);
+}
+
+// seaches each children array in every level of root.  
+// matches query's prop:val pairs for each level, and stores the match's index.
+// props contains properties that will be stored in the datum. Must be an array with at least 1 element
+function findDatum(root, query, props){
+    if (!Array.isArray(root["children"]))
+        throw new Error("root's children properties must be converted to arrays before findPath can be called. -from findPath with love");
+
+    var i0, i1, i2, i3; //indices needed to access element
+
+    i0 = getIndex(prop, query[0], root["children"]);
+    i1 = getIndex(prop, query[1], root["children"][i0]["children"]);
+    i2 = getIndex(prop, query[2], root["children"][i0]["children"][i1]["children"]);
+    i3 = getIndex(prop, query[3], root["children"][i0]["children"][i1]["children"][i2]["children"]);
+
+    return new Datum(i0, i1, i2, i3, props, root);
 }
 
 //searches tree for all nodes matching passed critera
 //returns array of paths(4-element arrays of indices) that fit the criteria
-function searchTree(root, searchQuery){
+function searchTree(root, searchQuery /*exclusions*/){
 
     var paths = [];
-    var values = [];
     var indices = new Path("", "", "", "", searchQuery["prop"]);
-    var exclusions, typesExcluded = [];
+    var exclusions = Array.prototype.slice.call(arguments, 2) || [];
+    var typesExcluded = [];
 
     //ensures that whatever types are going to be excluded will be included in datum objects for testing
-    searchQuery.exclusions.forEach(function(value, index, array){
+    exclusions.forEach(function(value, index, array){
         typesExcluded.push(value.prop);
     });
 
@@ -224,11 +236,9 @@ function searchTree(root, searchQuery){
         root["children"].forEach(collectNestedPaths);
     }
 
+    //****  Second pass:  iterates all exclusions and removes matches from paths  ****//
 
-
-    //****  Second pass:  iterates all exclusions and removes matches from paths
-
-    searchQuery["exclusions"].forEach(function(value, index, element){//for each exclusion in list...
+    exclusions.forEach(function(value, index, element){//for each exclusion in list...
         var exclusion = value;  //Exclusion object: prop, val, depth  
 
         paths.forEach(function(value, index, array){//for each path, find ones that match exclusion and remove them
@@ -243,37 +253,29 @@ function searchTree(root, searchQuery){
     return paths;
 }
 
-
-// this method proportionally distributes amounts among lines matching the supplied conditions
-function distributeAmounts(root, criteria, amounts){
-
-    // first pass through target lines -- sum existing amounts
-
-    // second pass -- distribute amounts proportionally
-    
-}
-
 // this method removes lines matching one of the supplied conditions and returns their totals
 function extractLines(root, criteria){
     var currentGrantTotals = 0, currentOperatingTotals = 0, currentTotals = 0;
     var nextGrantTotals = 0, nextOperatingTotals = 0, nextTotals = 0;
-    var path;
+    var path, datum; 
 
     criteria.forEach(function(value, index, array){ //first pass - collecting totals
         path = findPath(root, array[index]);
+        datum = new Datum(path[0], path[1], path[2], path[3], ["current", "next"], root);
 
-        currentGrantTotals += root["children"][path[0]]["children"][path[1]]["children"][path[2]]["children"][path[3]]["current"]["grant"];
-        currentOperatingTotals += root["children"][path[0]]["children"][path[1]]["children"][path[2]]["children"][path[3]]["current"]["operating"];
-        currentTotals += root["children"][path[0]]["children"][path[1]]["children"][path[2]]["children"][path[3]]["current"]["total"];
+        currentGrantTotals += datum["current"][3]["grant"];
+        currentOperatingTotals += datum["current"][3]["operating"];
+        currentTotals += datum["current"][3]["total"];
 
-        nextGrantTotals += root["children"][path[0]]["children"][path[1]]["children"][path[2]]["children"][path[3]]["next"]["grant"];
-        nextOperatingTotals += root["children"][path[0]]["children"][path[1]]["children"][path[2]]["children"][path[3]]["next"]["operating"];
-        nextTotals += root["children"][path[0]]["children"][path[1]]["children"][path[2]]["children"][path[3]]["next"]["total"];
+        nextGrantTotals += datum["next"][3]["grant"];
+        nextOperatingTotals += datum["next"][3]["operating"];
+        nextTotals += datum["next"][3]["total"];
     });
     
     criteria.forEach(function(value, index, array){ //second pass - removing properties
         try{//because node may've been deleted already
             path = findPath(root, array[index]);
+            //have to use long path because we're actually editing the tree here
             root["children"][path[0]]["children"][path[1]]["children"][path[2]]["children"].splice(path[3], 1);
         }
         catch(e){}
@@ -289,6 +291,25 @@ function extractLines(root, criteria){
 }
 
 
+
+// this method proportionally distributes amounts among lines matching the supplied conditions
+//toRemove = pathQuery     toDistribute = searchQuery
+function distributeAmounts(root, toRemove, toDistribute){
+    var distributionDatums = searchTree(root, toDistribute); 
+    var defaultProportion = 1 / distributionDatums.length;
+
+    // first pass through target lines -- sum existing amounts
+    var amounts = extractLines(root, toRemove); 
+
+    // second pass -- distribute amounts proportionally
+
+
+    var distributionAmount = 0;
+
+    for(property in amounts){
+        distributionAmount = amounts[property] / distributionDatums.length
+    }
+}
 
 
 
