@@ -28,23 +28,6 @@ var width = 400,
     bindEvents();
   });
 
-// !!!!Main function to draw and set up the visualization, once we have the data.!!!!!!!!!!!!!!!!!!!!
-  // d3.json("data/revenue-tree-normalized.json", function(error, root) {
-  //     yearCurrent = root.yearCurrent;
-  //     yearNext = root.yearNext;
-
-  //     d3.select('#headline')
-  //         .text(root.name);
-
-  //     d3.select('#yearCurrent')
-  //         .text(yearCurrent);
-
-  //     d3.select('#yearNext')
-  //         .text(yearNext);
-
-  //     d3.select('#budget-header')
-  //         .style('visibility', '');
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // this is the guts of our rendering - but this won't be run unless we call it.
   function drawD3Document(data) {
 

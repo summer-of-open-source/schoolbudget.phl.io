@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>School District of Philadelphia: Revenue Data Visualizer</title>
+        <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="/css/revenue.css">
         <meta property="og:title" content="School District of Philadelphia: Revenue Data Visualizer"/>
         <meta property="og:url" content="http://sdp-budget.poplar.phl.io/sunburst"/>
@@ -29,6 +30,12 @@
         <!-- End Google Tag Manager -->
 
         <header id="budget-header">
+            
+                <ul class="nav nav-tabs">
+                <li><a href="../index.html">Budget</a></li>
+                <li class="active"><a href="../revenue.html">Revenue</a></li>
+                </ul>
+                
             <h1>School District of Philadelphia Revenue</h1>
             <div id="share-buttons">
                 <!-- Facebook -->
@@ -58,7 +65,7 @@
          </div>
 
             <div id="credits">
-                <p>Created by <a href="https://twitter.com/ash_respicio" target="_blank">Ashleigh Respicio</a> &amp; <a href="https://twitter.com/theresnobox" target="_blank">Kristi Centinaro</a> | a <a href="http://codeforphilly.org/projects/sdp_online_budget_visualization" target="_blank">Code for Philly</a> project</p>
+                <p>Created by <a href="https://twitter.com/ash_respicio" target="_blank">Ashleigh Respicio</a> &amp; <a href="https://twitter.com/theresnobox" target="_blank">Kristi Centinaro</a> | a <a href="http://codeforphilly.org/projects/sdp_online_budget_visualization" target="_blank">Code for Philly</a> &  <a href="https://github.com/summer-of-open-source" target="_blank">GDI: Summer of Open Source</a> project</p>
             </div>
         </div>
         <!-- <div id="sidebar">
@@ -66,7 +73,9 @@
             <ul id="legend"></ul>
             <p class="note">Note: Undistributed budgetary adjustments and gap closing reductions are distributed for the purposes of this chart. <br><br> Source: <a href="http://webgui.phila.k12.pa.us/offices/o/open-data-initiative">SDP Open Data Initiative</a></p>
         </div> -->
+        
         <script type="text/javascript" src="/js/jquery-2.1.1.js"></script>
+        <script type="text/javascript" src="/js/bootstrap.min.js"></script>
         <script type="text/javascript" src="/js/d3.js"></script>
         <script type="text/javascript" src="/js/numeral.js"></script>
         <script type="text/javascript" src="/js/sunburst_rev.js"></script>
