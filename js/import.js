@@ -135,13 +135,14 @@ function parseNestedCSV() {
         },
         //callback.  Actions to take after csv file has been fully parsed
         function(dataArray) {
-            convertChildren(tree, null, null);
+            convertChildren(tree, null, null); //converts all objects stored in "children" properties to arrays
             main(tree); //calling main here to ensure data will be assembled when it runs
 
             runTests();
 
         });
 
+    //this happens before everything in the callback!!
     console.log("********  NESTED TREE  *******");
     console.log(tree); 
     return tree;

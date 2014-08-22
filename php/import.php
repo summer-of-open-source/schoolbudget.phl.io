@@ -139,25 +139,29 @@ if (!empty($_FILES['budget'])) {
         $totals = array();
         foreach ($lines AS $Line) {
             foreach ($columns AS $column) {
-                $totals[$column] += $Line->$column;
+                $totals[$column] += $Line->$column; 
             }
         }
+        //result: $totals contains 10 properties named after values in columnsCurrent/columnsProposed(i think)
+        //each contains the sum of all data items that meet conditions
+
 
         // second pass -- distribute amounts proportionally
-        $newTotals = array();
-        $defaultProportion = 1 / count($lines);
-        foreach ($lines AS $Line) {
-            foreach ($totals AS $column => $total) {
-                if ($total) {
-                    $proportion = $Line->$column / $total;
-                } else {
-                    $proportion = $defaultProportion;
+        $newTotals = array(); //stores new totals
+        $defaultProportion = 1 / count($lines); //what to multiply each selected element by.  1 / #lines distributing to
+        foreach ($lines AS $Line) { //for each line in distribution lines
+            foreach ($totals AS $column => $total) {  //for each total(contains summed totals with a matching key)
+                if ($total) { //if a total evaluates to true...  meaning it is not zero, i think...  and why would the proportion change b/c of that?
+                    $proportion = $Line->$column / $total;// proportion = line[column] / total
+                } else {//if total = 0?
+                    $proportion = $defaultProportion;//proportion = default
                 }
 
-                $Line->$column += round($amounts[$column] * $proportion, 2);
-                $newTotals[$column] += $Line->$column;
+                $Line->$column += round($amounts[$column] * $proportion, 2); //line[column] += (amounts[column] *proportion) rounded to 2nd place
+                $newTotals[$column] += $Line->$column; //newTotals[column] += line[column]
+                //summing new totals in newTotals object.  why? 
             }
-            $Line->save();
+            $Line->save();//and what's this doing?
         }
     };
 

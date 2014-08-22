@@ -186,8 +186,8 @@ function searchTree(root, searchQuery /*exclusions*/){
     return paths;
 }
 
- //needs access to inclusion, indices, paths, 
-//and typesExcluded (so datum object knows what data it needs to collect.  said data will be compared to the exclusion objects later.)
+//needs access to inclusion, indices, paths, and typesExcluded (so datum object knows 
+//what data it needs to collect.  Said data will be compared to the exclusion objects later.)
 //doesn't currently check for duplicate data items as they're being added
 //you could potentially add the same data item multiple times
 function include(paths, inclusion, typesExcluded, root){
@@ -309,9 +309,9 @@ function extractLines(root, criteria){
 
 
 // this method proportionally distributes amounts among lines matching the supplied conditions
-//toRemove = pathQuery     toDistribute = searchQuery
-function distributeAmounts(root, toRemove, toDistribute){
-    var distributionDatums = searchTree(root, toDistribute); 
+//toRemove = Query     toDistribute = Query     exclusions = [Exclusion]
+function distributeAmounts(root, toRemove, toDistribute, exclusions){
+    var distributionDatums = searchTree(root, toDistribute, exclusions); 
     var defaultProportion = 1 / distributionDatums.length;
 
     // first pass through target lines -- sum existing amounts
@@ -319,8 +319,6 @@ function distributeAmounts(root, toRemove, toDistribute){
 
     // second pass -- distribute amounts proportionally
 
-
-    var distributionAmount = 0;
 
     for(property in amounts){
         distributionAmount = amounts[property] / distributionDatums.length
