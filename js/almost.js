@@ -36,7 +36,6 @@ function Query(val1, val2, val3, val4, prop){
     this[1] = val2;
     this[2] = val3;
     this[3] = val4;
-    this.prop = prop;
 
     if (Array.isArray(prop))
         this[prop] = prop;
@@ -133,7 +132,7 @@ function getIndex(prop, val, array){
         }
     }
     console.log(new Error("value pair \""+prop+": "+val+"\" not found  -from getIndex with love"));
-    //return -1;
+    return -1;
 }
 
 // seaches each children array in every level of root.  
@@ -172,7 +171,6 @@ function findDatum(root, query, props){
 
 //searches tree for all nodes matching passed critera
 //returns array of paths(4-element arrays of indices) that fit the criteria
-//can only accept 1 inclusion, but can accept multiple exclusions
 function searchTree(root, searchQuery /*exclusions*/){
 
     var paths = [];
@@ -188,53 +186,37 @@ function searchTree(root, searchQuery /*exclusions*/){
 
     //***  first pass: makes a Datum object for each match in root, and adds it to paths  ***//
 
-    paths = include(paths, searchQuery, typesExcluded, root); //for later: make SearchQuery an array and iterate it
-
-    //****  Second pass:  iterates all exclusions and removes matches from paths  ****//
-
-    exclusions.forEach(function(value, index, element){//for each exclusion in list...
-        paths = exclude(paths, value);
-    });
-
-    return paths;
-}
-
- //needs access to inclusion, indices, paths, and typesExcluded (so datum object knows what data it needs to collect)
-//doesn't currently check for duplicate data items as they're being added
-//you could potentially add the same data item multiple times
-function include(paths, inclusion, typesExcluded, root){
-    var indices = new Path("", "", "", "", inclusion["prop"]);
-
+    //needs access to searchQuery, indices, and paths
     //recursively collects paths of all children/grandchildren/etc of passed value
     function collectNestedPaths(value, index, array){
         var depth = array[0].depth - 1; //-1 because the depth property starts at 1 not 0.
-        inclusion[depth] = value[inclusion["prop"]];
+        searchQuery[depth] = value[searchQuery["prop"]];
 
         if (depth < 3){ //if this is not the lowest level
-            indices[depth] = getIndex(inclusion["prop"], inclusion[depth], array);
+            indices[depth] = getIndex(searchQuery["prop"], searchQuery[depth], array);
             array[indices[depth]]["children"].forEach(collectNestedPaths);
         }
         else{ 
-            indices[depth] = getIndex(inclusion["prop"], inclusion[depth], array);
+            indices[depth] = getIndex(searchQuery["prop"], searchQuery[depth], array);
             paths.push(new Datum(indices[0], indices[1], indices[2], indices[3], typesExcluded, root));
         }
     }
 
-    //tests each index in inclusion.  
+    //tests each index in searchQuery.  
         //if there is a value, and this is the LAST ONE, create a path for that value and add it to paths
         //If there is a value, and this ISN'T the LAST ONE, test the next value.
         //else, if there is NO VALUE, add paths of all nested data items from that point down via collectNestedPaths
-    if (inclusion[0].length > 0){ 
-        indices[0] = getIndex(inclusion["prop"], inclusion[0], root["children"]);
+    if (searchQuery[0].length > 0){ 
+        indices[0] = getIndex(searchQuery["prop"], searchQuery[0], root["children"]);
 
-        if(inclusion[1].length > 0){ 
-            indices[1] = getIndex(inclusion["prop"], inclusion[1], root["children"][indices[0]]["children"]);     
+        if(searchQuery[1].length > 0){ 
+            indices[1] = getIndex(searchQuery["prop"], searchQuery[1], root["children"][indices[0]]["children"]);     
 
-            if(inclusion[2].length > 0){ 
-                indices[2] = getIndex(inclusion["prop"], inclusion[2], root["children"][indices[0]]["children"][indices[1]]["children"]);
+            if(searchQuery[2].length > 0){ 
+                indices[2] = getIndex(searchQuery["prop"], searchQuery[2], root["children"][indices[0]]["children"][indices[1]]["children"]);
                 
-                    if(inclusion[3].length > 0){ 
-                        indices[3] = getIndex(inclusion["prop"], inclusion[3], root["children"][indices[0]]["children"][indices[1]]["children"][indices[2]]["children"]);
+                    if(searchQuery[3].length > 0){ 
+                        indices[3] = getIndex(searchQuery["prop"], searchQuery[3], root["children"][indices[0]]["children"][indices[1]]["children"][indices[2]]["children"]);
                     }
                     else{ 
                         root["children"][indices[0]]["children"][indices[1]]["children"][indices[2]]["children"].forEach(collectNestedPaths);
@@ -254,33 +236,22 @@ function include(paths, inclusion, typesExcluded, root){
         root["children"].forEach(collectNestedPaths);
     }
 
-    return paths;
-}
+    //****  Second pass:  iterates all exclusions and removes matches from paths  ****//
 
-//takes datumList and exclusion object.  removes elements that match the exclusion.
-function exclude(paths, exclusion){
-    var currentPath;
+    exclusions.forEach(function(value, index, element){//for each exclusion in list...
+        var exclusion = value;  //Exclusion object: prop, val, depth  
 
-    function condenseArray(sparseArray){
-        var condensedArray = [];
-        sparseArray.forEach(function(value, index, element){
-            if (value) //if value is not undefined, null, or NAN
-                condensedArray.push(value);
+        paths.forEach(function(value, index, array){//for each path, find ones that match exclusion and remove them
+            var datum = value;
+
+            if (datum[exclusion.prop][exclusion.depth] === exclusion.val)
+                paths.splice(index, 1);
         });
-        return condensedArray;
-    }
 
-    paths.forEach(function(value, index, array){//for each path, find ones that match exclusion and remove them
-        currentPath = value;
-
-        if (currentPath[exclusion.prop][exclusion.depth] === exclusion.val) //if it matches...
-            paths[index] = undefined;//creating a sparse array to keep the index accurate. 
     });
-    paths = condenseArray(paths); //condensing sparse array
+
     return paths;
 }
-
-
 
 // this method removes lines matching one of the supplied conditions and returns their totals
 function extractLines(root, criteria){

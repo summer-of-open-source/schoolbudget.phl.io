@@ -66,9 +66,12 @@ function runTests(){
      // console.log(datums);
 
 
-     console.log(searchTree(tree, new Query("F21001", "F49021", "F49027", "", "code")));
-     console.log(searchTree(tree, new Query("F21001" , "F49015", "", "", "code")));
-     console.log(searchTree(tree, new Query("F21001" , "", "", "", "code")));
+     // console.log(searchTree(tree, new Query("F21001", "F49021", "F49027", "", "code")));
+     // console.log(searchTree(tree, new Query("F21001" , "F49015", "", "", "code")));
+     // console.log(searchTree(tree, new Query("F21001" , "", "", "", "code")));
+     console.log(searchTree(tree, new Query("F21001" , "F49015", "", "", "code"), new Exclusion("name", "School Budgets including Non-District Operated Schools", 0), new Exclusion("code", "F21001", 0)));
+     //console.log(searchTree(tree, new Query("F21001" , "", "", "", "code"),  new Exclusion("code", "F21001", 0)));
+
 
 
 
