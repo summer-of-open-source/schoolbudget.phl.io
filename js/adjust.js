@@ -2,6 +2,10 @@
 /************ Budgetary Adjustments ************/
 /***********************************************/
 
+
+//********  custom "data types" for formatting data  ********//
+//********  that needs to be passed to search funcs  ********//
+
 function Path(index0, index1, index2, index3){
     this[0] = index0,
     this[1] = index1,
@@ -9,28 +13,8 @@ function Path(index0, index1, index2, index3){
     this[3] = index3
 }
 
-// //exclusions is an array of Exclusion objects
-// function SearchQuery(prop0, prop1, prop2, prop3, propName, exclusions){
-//     PathQuery.call(this, prop0, prop1, prop2, prop3, propName)
-//     this.exclusions = exclusions || [];
-
-//     return this;
-// }
-
-// function PathQuery(prop0, prop1, prop2, prop3, propName){
-//     this[0] = prop0; //values to search for in prop
-//     this[1] = prop1;
-//     this[2] = prop2;
-//     this[3] = prop3;
-//     this.prop = propName; //property that will contain values in 0-3
-
-//     return this;
-// }
-
-//custom "data types" for formatting data that will be passed to search functions
-//in future: SIMPLIFY!!  how about just a datum object and a query object?
-
-//contains a property name and its values over 4 levels
+//contains a property name and its values over 4 levels 
+//aka "Inclusion"
 function Query(val1, val2, val3, val4, prop){
     this[0] = val1;
     this[1] = val2;
@@ -87,10 +71,10 @@ Datum.prototype.getDatumProperties = function(propName, array, depth){
 //note: 
 //first element = element to be totaled & replaced
 //second element = elements which will receive distributed total
-//third+ element = exclusions that apply to 
+//third+ element = exclusions that apply to second element
 
 var miscAdjust1 = [ new Query("F21003", "F31620", "F49000", "5221", "code"), // Food Service > Allocated Costs
-                    new Query("F21003", "F31620", "" , "", "code"), 
+                    new Query("F21003", "F31620", "" , "", "code"), //Operating support group...
                     new Exclusion("code", "F41071", 2), 
                     new Exclusion("code", "5221", 3), 
                     new Exclusion("code", "F41038", 2) 
@@ -138,7 +122,8 @@ function getIndex(prop, val, array){
 
 // seaches each children array in every level of root.  
 // matches query's prop:val pairs for each level, and stores the match's index.
-function find(root, query){
+// returns an array with the indices of queried object.  must be a COMPLETE query
+function findPath(root, query){
     if (!Array.isArray(root["children"]))
         throw new Error("root's children properties must be converted to arrays before findPath can be called. -from findPath with love");
 
@@ -150,7 +135,7 @@ function find(root, query){
     i2 = getIndex(prop, query[2], root["children"][i0]["children"][i1]["children"]);
     i3 = getIndex(prop, query[3], root["children"][i0]["children"][i1]["children"][i2]["children"]);
 
-    return new Path(i0, i1, i2, i3);
+    return [i0, i1, i2, i3];
 }
 
 // seaches each children array in every level of root.  
@@ -158,7 +143,7 @@ function find(root, query){
 // props contains properties that will be stored in the datum. Must be an array with at least 1 element
 function findDatum(root, query, props){
     if (!Array.isArray(root["children"]))
-        throw new Error("root's children properties must be converted to arrays before findPath can be called. -from findPath with love");
+        throw new Error("root's children properties must be converted to arrays before findDatum can be called. -from findDatum with love");
 
     var i0, i1, i2, i3; //indices needed to access element
 
@@ -171,7 +156,7 @@ function findDatum(root, query, props){
 }
 
 //searches tree for all nodes matching passed critera
-//returns array of paths(4-element arrays of indices) that fit the criteria
+//returns array of paths(4-element arrays of datum objects) that fit the criteria
 //can only accept 1 inclusion, but can accept multiple exclusions
 function searchTree(root, searchQuery /*exclusions*/){
 
@@ -185,13 +170,10 @@ function searchTree(root, searchQuery /*exclusions*/){
         typesExcluded.push(value.prop);
     });
 
-
     //***  first pass: makes a Datum object for each match in root, and adds it to paths  ***//
-
-    paths = include(paths, searchQuery, typesExcluded, root); //for later: make SearchQuery an array and iterate it
+    paths = include(paths, searchQuery, typesExcluded, root); //for later: make SearchQuery an array and iterate it.  Multiple inclusions!!!
 
     //****  Second pass:  iterates all exclusions and removes matches from paths  ****//
-
     exclusions.forEach(function(value, index, element){//for each exclusion in list...
         paths = exclude(paths, value);
     });
@@ -199,7 +181,8 @@ function searchTree(root, searchQuery /*exclusions*/){
     return paths;
 }
 
- //needs access to inclusion, indices, paths, and typesExcluded (so datum object knows what data it needs to collect)
+ //needs access to inclusion, indices, paths, 
+//and typesExcluded (so datum object knows what data it needs to collect.  said data will be compared to the exclusion objects later.)
 //doesn't currently check for duplicate data items as they're being added
 //you could potentially add the same data item multiple times
 function include(paths, inclusion, typesExcluded, root){
@@ -281,8 +264,7 @@ function exclude(paths, exclusion){
 }
 
 
-
-// this method removes lines matching one of the supplied conditions and returns their totals
+// this method removes lines matching the supplied conditions and returns their totals
 function extractLines(root, criteria){
     var currentGrantTotals = 0, currentOperatingTotals = 0, currentTotals = 0;
     var nextGrantTotals = 0, nextOperatingTotals = 0, nextTotals = 0;

@@ -28,13 +28,13 @@ var miscCodes = [   new Query("F21003", "F31620", "F49000", "5221", "code"),
                 ];
 
 // for testing searchTree and Query
-var searchCodes = [ [new Query("F21001", "F49021", "F49027", "", "code")],
-                    [new Query("F21001" , "F49015", "", "", "code")],
-                    [new Query("F21001" , "", "", "", "code")]
-                    // [new Query("" , "", "", "", "code"), //should return paths of every element in tree
-                    // [new Query("F21003", "F31620", "F41071", "", "code"), new Exclusion("name", "School Budgets including Non-District Operated Schools", 0)],
-                    // [new Query("F21003", "F31620", "F41071", "", "code"), new Exclusion("code", "2725", 3), new Exclusion("code", "2746", 3)], 
-                    // [new Query("F21003", "F31620", "" , "", "code"), new Exclusion("code", "F41071", 2), new Exclusion("code", "5221", 3)]
+var searchCodes = [ {"query": new Query("F21001", "F49021", "F49027", "", "code")},
+                    {"query": new Query("F21001" , "F49015", "", "", "code")},
+                    {"query": new Query("F21001" , "", "", "", "code")},
+                    {"query": new Query("" , "", "", "", "code")}, //should return paths of every element in tree
+                    {"query": new Query("F21003", "F31620", "F41071", "", "code"), "ex1": new Exclusion("name", "School Budgets including Non-District Operated Schools", 0)},
+                    {"query": new Query("F21003", "F31620", "F41071", "", "code"), "ex1": new Exclusion("code", "2725", 3), "ex2":new Exclusion("code", "2746", 3)}, //should return empty array
+                    {"query": new Query("F21003", "F31620", "" , "", "code"), "ex1": new Exclusion("code", "F41071", 2), "ex2":new Exclusion("code", "5221", 3)}
                 ];
 
 
@@ -55,8 +55,8 @@ function runTests(){
      //  console.log(findPath(tree, miscCodes[i]));
      // }
 
-     // console.log("**** extractLines Test ****");
-     // console.log(extractLines(tree, miscCodes));
+     console.log("**** extractLines Test ****");
+     console.log(extractLines(tree, miscCodes));
 
      // console.log("***** Datum object tests ******")
      // var datums = [  new Datum(0, 2, 3, 7, ["code", "name"], tree),
@@ -65,16 +65,17 @@ function runTests(){
      // ];
      // console.log(datums);
 
-
-     // console.log(searchTree(tree, new Query("F21001", "F49021", "F49027", "", "code")));
-     // console.log(searchTree(tree, new Query("F21001" , "F49015", "", "", "code")));
-     // console.log(searchTree(tree, new Query("F21001" , "", "", "", "code")));
-     console.log(searchTree(tree, new Query("F21001" , "F49015", "", "", "code"), new Exclusion("name", "School Budgets including Non-District Operated Schools", 0), new Exclusion("code", "F21001", 0)));
-     //console.log(searchTree(tree, new Query("F21001" , "", "", "", "code"),  new Exclusion("code", "F21001", 0)));
-
-
-
+     //test searchTree     
+     // searchCodes.forEach(function(value, index, array){
+     //      if (Object.keys(value).length === 1) //no exclusions
+     //           console.log(searchTree(tree, value["query"]));
+     //      else if (Object.keys(value).length === 2) //1 exclusion
+     //           console.log(searchTree(tree, value["query"], value["ex1"]));
+     //      else if (Object.keys(value).length === 3) //2 exclusions
+     //           console.log(searchTree(tree, value["query"], value["ex1"], value["ex2"]));
+     // });
 
 }
+
 
 
