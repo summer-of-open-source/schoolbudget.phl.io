@@ -53,13 +53,13 @@ function runTests(){
      //      ];
      // console.log(datums);
 
-     console.log("***** Datum object tests ******")
-     var datums = [    new Datum(0, 2, 3, 7, tree),
-                       new Datum(3, 0, 0, 3, tree), 
-                       new Datum(3, 0, 0, 0, tree),
-                       new Datum(0, 2, 3, 7, tree),
-          ];
-     console.log(datums);
+     // console.log("***** Datum object tests ******")
+     // var datums = [    new Datum(0, 2, 3, 7, tree),
+     //                   new Datum(3, 0, 0, 3, tree), 
+     //                   new Datum(3, 0, 0, 0, tree),
+     //                   new Datum(0, 2, 3, 7, tree),
+     //      ];
+     // console.log(datums);
 
      // // test searchTree: exclusions passed individually
      // searchCodes.forEach(function(value, index, array){
@@ -77,7 +77,7 @@ function runTests(){
      });
 
      // test distributeAmounts: exclusions passed as arrays   
-     // distributeAmounts(tree, miscAdjust1[0], miscAdjust1[1], miscAdjust1[2]);
+     distributeAmounts(tree, miscAdjust1[0], miscAdjust1[1], miscAdjust1[2]);
 
 
 }

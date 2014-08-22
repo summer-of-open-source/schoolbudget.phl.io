@@ -120,8 +120,10 @@ function getIndex(prop, val, array){
             return i;
         }
     }
-    console.log(new Error("value pair \""+prop+": "+val+"\" not found  -from getIndex with love"));
-    //return -1;
+    var e = new Error("value pair \""+prop+": "+val+"\" not found! -from getIndex with love");
+    e.array = array;
+    e.possibleCauses = "did you call extractLines before this?  The line you're looking for might've been removed.";
+    console.log(e);
 }
 
 // seaches each children array in every level of root.  
@@ -132,12 +134,11 @@ function findPath(root, query){
         throw new Error("root's children properties must be converted to arrays before findPath can be called. -from findPath with love");
 
     var i0, i1, i2, i3; //indices needed to access element
-    var prop = query["prop"]; 
 
-    i0 = getIndex(prop, query[0], root["children"]);
-    i1 = getIndex(prop, query[1], root["children"][i0]["children"]);
-    i2 = getIndex(prop, query[2], root["children"][i0]["children"][i1]["children"]);
-    i3 = getIndex(prop, query[3], root["children"][i0]["children"][i1]["children"][i2]["children"]);
+    i0 = getIndex(query["prop"], query[0], root["children"]);
+    i1 = getIndex(query["prop"], query[1], root["children"][i0]["children"]);
+    i2 = getIndex(query["prop"], query[2], root["children"][i0]["children"][i1]["children"]);
+    i3 = getIndex(query["prop"], query[3], root["children"][i0]["children"][i1]["children"][i2]["children"]);
 
     return [i0, i1, i2, i3];
 }
@@ -145,18 +146,18 @@ function findPath(root, query){
 // seaches each children array in every level of root.  
 // matches query's prop:val pairs for each level, and stores the match's index.
 // props contains properties that will be stored in the datum. Must be an array with at least 1 element
-function findDatum(root, query, props){
+function findDatum(root, query){
     if (!Array.isArray(root["children"]))
         throw new Error("root's children properties must be converted to arrays before findDatum can be called. -from findDatum with love");
 
     var i0, i1, i2, i3; //indices needed to access element
 
-    i0 = getIndex(prop, query[0], root["children"]);
-    i1 = getIndex(prop, query[1], root["children"][i0]["children"]);
-    i2 = getIndex(prop, query[2], root["children"][i0]["children"][i1]["children"]);
-    i3 = getIndex(prop, query[3], root["children"][i0]["children"][i1]["children"][i2]["children"]);
+    i0 = getIndex(query["prop"], query[0], root["children"]);
+    i1 = getIndex(query["prop"], query[1], root["children"][i0]["children"]);
+    i2 = getIndex(query["prop"], query[2], root["children"][i0]["children"][i1]["children"]);
+    i3 = getIndex(query["prop"], query[3], root["children"][i0]["children"][i1]["children"][i2]["children"]);
 
-    return new Datum(i0, i1, i2, i3, props, root);
+    return new Datum(i0, i1, i2, i3, root);
 }
 
 //searches tree for all nodes matching passed critera
@@ -278,8 +279,8 @@ function extractLines(root, criteria){
     }
 
     criteria.forEach(function(value, index, array){ //first pass - collecting totals
-        path = findPath(root, array[index]);
-        datum = new Datum(path[0], path[1], path[2], path[3], ["current", "next"], root);
+        //path = findDatum(root, array[index]);
+        datum = findDatum(root, array[index]);
 
         currentCapitalTotals += datum["current"][3]["capital"];
         currentOtherTotals += datum["current"][3]["other"];
