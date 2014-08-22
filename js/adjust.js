@@ -47,10 +47,10 @@ function Datum(index0, index1, index2, index3, propNames, root){
     this[2] = index2,
     this[3] = index3
 
-    if (Array.isArray(propNames) && root){
+    if (Array.isArray(propNames) && root){ //if a root and an ARRAY of propNames is passed
         this.root = root;
-        for (var i = 0; i < propNames.length; i++){
-            this[propNames[i]] = {};
+        for (var i = 0; i < propNames.length; i++){//iterate each propName in list
+            this[propNames[i]] = {};//create a new property with that propName
             this.getDatumProperties(propNames[i], root["children"], 0); //goes down 4 levels and fetches property values at each
         }
     }
@@ -271,18 +271,22 @@ function exclude(paths, exclusion){
 
 // this method removes lines matching the supplied conditions and returns their totals
 function extractLines(root, criteria){
-    var currentGrantTotals = 0, currentOperatingTotals = 0, currentTotals = 0;
-    var nextGrantTotals = 0, nextOperatingTotals = 0, nextTotals = 0;
+    var currentGrantTotals = 0, currentOperatingTotals = 0, currentTotals = 0, currentOtherTotals = 0, currentCapitalTotals = 0;
+    var nextGrantTotals = 0, nextOperatingTotals = 0, nextTotals = 0, nextOtherTotals = 0, nextCapitalTotals = 0;
     var path, datum; 
 
     criteria.forEach(function(value, index, array){ //first pass - collecting totals
         path = findPath(root, array[index]);
         datum = new Datum(path[0], path[1], path[2], path[3], ["current", "next"], root);
 
+        currentCapitalTotals += datum["current"][3]["capital"];
+        currentOtherTotals += datum["current"][3]["other"];
         currentGrantTotals += datum["current"][3]["grant"];
         currentOperatingTotals += datum["current"][3]["operating"];
         currentTotals += datum["current"][3]["total"];
 
+        nextCapitalTotals += datum["current"][3]["capital"];
+        nextOtherTotals += datum["current"][3]["other"];
         nextGrantTotals += datum["next"][3]["grant"];
         nextOperatingTotals += datum["next"][3]["operating"];
         nextTotals += datum["next"][3]["total"];
@@ -297,13 +301,26 @@ function extractLines(root, criteria){
         catch(e){}
     });
 
-    return {    "currentGrantTotals": currentGrantTotals,
+    return {    "currentOtherTotals": currentOtherTotals,
+                "currentCapitalTotals": currentCapitalTotals,
+                "currentGrantTotals": currentGrantTotals,
                 "currentOperatingTotals": currentOperatingTotals,
                 "currentTotals": currentTotals,
+                "nextOtherTotals": nextOtherTotals,
+                "nextCapitalTotals": nextCapitalTotals,
                 "nextGrantTotals": nextGrantTotals,
                 "nextOperatingTotals": nextOperatingTotals,
                 "nextTotals": nextTotals
             };
+}
+
+//updates node on tree with properties on a matching datum object
+function updateTree(datum, key){
+    datum["root"]["children"][datum[0]]["children"][datum[1]]["children"][datum[2]]["children"][datum[3]]
+
+    newVal = datum[key]; //note to self - make sure all children of current/next get updated!!
+
+
 }
 
 
@@ -311,19 +328,83 @@ function extractLines(root, criteria){
 // this method proportionally distributes amounts among lines matching the supplied conditions
 //toRemove = Query     toDistribute = Query     exclusions = [Exclusion]
 function distributeAmounts(root, toRemove, toDistribute, exclusions){
+    var amounts = extractLines(root, toRemove); 
+    var keys = Object.keys(amounts); //contains keys (currentGrantTotals, currentTotals, etc)
     var distributionDatums = searchTree(root, toDistribute, exclusions); 
-    var defaultProportion = 1 / distributionDatums.length;
+
+    var proportion, defaultProportion = 1 / distributionDatums.length;
+
+
+    //initialize totals & newTotals
+    var totals = {}, newTotals = {};
+    keys.forEach(function(key, index, array){
+        totals[key] = 0;
+        newTotals[key] = 0;
+    });
 
     // first pass through target lines -- sum existing amounts
-    var amounts = extractLines(root, toRemove); 
+   distributionDatums.forEach(function(datum, index, array){//for each distribution datum
+        //datum = value;
+        keys.forEach(function(key, index, array){//for each key
+            //key = value;
+            if (key.indexOf("next") > 0)
+                totals[key] += datum["next"][key];
+            else
+                totals[key] += datum["current"][key];
+        });
+   });
 
     // second pass -- distribute amounts proportionally
+    distributionDatums.forEach(function(datum, index, array){//for each distribution datum
+        //datum = value;
+        keys.forEach(function(key, index, array){//for each key
+            //key = value;
+            var midKey;
+            if (key.indexOf("next") > 0)
+                midKey = "next";
+            else
+                midKey = "current";
+
+            if(totals[key] !== 0){
+                proportion = datum[midKey][key] / totals[key];
+            }
+            else
+                proportion = defaultProportion;
 
 
-    for(property in amounts){
-        distributionAmount = amounts[property] / distributionDatums.length
-    }
+            datum[midKey][key] = (amounts[key] * proportion, -2).toFixed(2);//rounds to 2 decimal places
+            newTotals[key] = datum[midKey][key];
+        });
+   });   
+
 }
 
+// // first pass through target lines -- sum existing amounts
+// $totals = array();
+// foreach ($lines AS $Line) {
+//     foreach ($columns AS $column) {
+//         $totals[$column] += $Line->$column; 
+//     }
+// }
+// //result: $totals contains 10 properties named after values in columnsCurrent/columnsProposed(i think)
+// //each contains the sum of all data items that meet conditions
 
+
+// // second pass -- distribute amounts proportionally
+// $newTotals = array(); //stores new totals
+// $defaultProportion = 1 / count($lines); //what to multiply each selected element by.  1 / #lines distributing to
+// foreach ($lines AS $Line) { //for each line in distribution lines
+//     foreach ($totals AS $column => $total) {  //for each total(contains summed totals with a matching key)
+//         if ($total) { //if a total evaluates to true...  meaning it is not zero, i think...  and why would the proportion change b/c of that?
+//             $proportion = $Line->$column / $total;// proportion = line[column] / total
+//         } else {//if total = 0?
+//             $proportion = $defaultProportion;//proportion = default
+//         }
+
+//         $Line->$column += round($amounts[$column] * $proportion, 2); //line[column] += (amounts[column] *proportion) rounded to 2nd place.  This is actually editing the value in the tree
+//         $newTotals[$column] += $Line->$column; //newTotals[column] += line[column]
+//         //summing new totals in newTotals object.  why? what are we doing with it after this?
+//     }
+//     $Line->save();//and what's this doing?  saving modifications to the line is my guess...
+// }
 

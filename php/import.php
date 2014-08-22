@@ -157,9 +157,9 @@ if (!empty($_FILES['budget'])) {
                     $proportion = $defaultProportion;//proportion = default
                 }
 
-                $Line->$column += round($amounts[$column] * $proportion, 2); //line[column] += (amounts[column] *proportion) rounded to 2nd place
+                $Line->$column += round($amounts[$column] * $proportion, 2); //line[column] += (amounts[column] *proportion) rounded to 2nd place.  This is actually editing the value in the tree
                 $newTotals[$column] += $Line->$column; //newTotals[column] += line[column]
-                //summing new totals in newTotals object.  why? 
+                //summing new totals in newTotals object.  why? what are we doing with it after this?
             }
             $Line->save();//and what's this doing?
         }
