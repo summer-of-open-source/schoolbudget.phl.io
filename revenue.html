@@ -4,13 +4,11 @@
         <meta charset="utf-8">
         <title>School District of Philadelphia: Revenue Data Visualizer</title>
         <link rel="stylesheet" type="text/css" href="/css/revenue.css">
-        <meta property="og:title" content="School District of Philadelphia: Budget Data Visualizer"/>
+        <meta property="og:title" content="School District of Philadelphia: Revenue Data Visualizer"/>
         <meta property="og:url" content="http://sdp-budget.poplar.phl.io/sunburst"/>
         <meta property="og:site_name" content="Code for Philly"/>
-        <meta property="og:image" content="http://sdp-budget.poplar.phl.io/sdp_budget_visualizer.png" />
-        <link rel="image_src" href="http://sdp-budget.poplar.phl.io/sdp_budget_visualizer.png">
         <meta property="og:description"content="A web-based visualization of the budget information released on the School District of Philadelphia's Open Data Initiative page." />
-        <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js"></script> 
+        <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js"></script>
         <script>
           WebFont.load({
             google: {
@@ -18,10 +16,6 @@
             }
           });
         </script>
-        <script type="text/javascript" src="/js/jquery-2.1.1.js"></script>
-        <script src="js/d3.min.js"></script>
-        <script type="text/javascript" src="/js/numeral.js"></script>
-        <script src="js/sunburst_rev.js"></script>
     </head>
     <body>
         <!-- Google Tag Manager -->
@@ -34,8 +28,8 @@
             })(window,document,'script','dataLayer','GTM-K4G748');</script>
         <!-- End Google Tag Manager -->
 
-        <header id="budget-header" style="visibility: hidden">
-            <h1 id="headline"></h1>
+        <header id="budget-header">
+            <h1>School District of Philadelphia Revenue</h1>
             <div id="share-buttons">
                 <!-- Facebook -->
                 <a href="http://www.facebook.com/sharer.php?u=http://schoolbudget.phl.io/" target="_blank"><img src="http://www.simplesharebuttons.com/images/somacro/facebook.png" alt="Facebook" /></a>
@@ -55,35 +49,26 @@
                 <!-- Email -->
                 <a href="mailto:?Subject=School District Budget&Body=School%20District%20Budget%20Visualization%20 http://schoolbudget.phl.io/"><img src="http://www.simplesharebuttons.com/images/somacro/email.png" alt="Email" /></a>
             </div>
-        <!--     <form>
-                <div>
-                    <span class="year-label">Estimated <span id="yearCurrent"></span> budget:</span>
-                    <label><input type="radio" name="fund" value="current.total" checked> Total    </label>
-                    <label><input type="radio" name="fund" value="current.operating"> Operating    </label>
-                    <label><input type="radio" name="fund" value="current.grant"> Grant    </label>
-                    <label><input type="radio" name="fund" value="current.capital"> Capital    </label>
-                    <label><input type="radio" name="fund" value="current.other"> Other</label>
-                </div>
-                <div>
-                    <span class="year-label">Proposed <span id="yearNext"></span> budget:</span>
-                    <label><input type="radio" name="fund" value="next.total"> Total    </label>
-                    <label><input type="radio" name="fund" value="next.operating"> Operating    </label>
-                    <label><input type="radio" name="fund" value="next.grant"> Grant    </label>
-                    <label><input type="radio" name="fund" value="next.capital"> Capital    </label>
-                    <label><input type="radio" name="fund" value="next.other"> Other</label>
-                </div>
-            </form> -->
         </header>
 
-        <div id="container">
+        <div id="container" class="clearfix">
             <div id="chart"></div>
+            <div id="key"></div> 
+            <div id="note">Note: Undistributed budgetary adjustments and gap closing reductions are distributed for the purposes of this chart. <br><br> Source: <a href="http://webgui.phila.k12.pa.us/offices/o/open-data-initiative">SDP Open Data Initiative</a></div>
+         </div>
+
             <div id="credits">
-                <p>Created by <a href="https://twitter.com/ash_respicio" target="_blank">Ashleigh Respicio</a> &amp; <a href="https://twitter.com/theresnobox" target="_blank">Kristi Centinaro</a> | a <a href="http://codeforphilly.org/projects/sdp_online_budget_visualization" target="_blank">Girl Develop It: Summer of Open Source</a> project</p>
+                <p>Created by <a href="https://twitter.com/ash_respicio" target="_blank">Ashleigh Respicio</a> &amp; <a href="https://twitter.com/theresnobox" target="_blank">Kristi Centinaro</a> | a <a href="http://codeforphilly.org/projects/sdp_online_budget_visualization" target="_blank">Code for Philly</a> project</p>
             </div>
         </div>
-        <div id="key">
+        <!-- <div id="sidebar">
 
-            <p class="note">Source: <a href="http://webgui.phila.k12.pa.us/uploads/8S/aS/8SaShy6J62N8bHPKwi3uhg/fy14-proposed-budget-in-brief.pdf">SDP Open Data Initiative</a></p>
-        </div>
+            <ul id="legend"></ul>
+            <p class="note">Note: Undistributed budgetary adjustments and gap closing reductions are distributed for the purposes of this chart. <br><br> Source: <a href="http://webgui.phila.k12.pa.us/offices/o/open-data-initiative">SDP Open Data Initiative</a></p>
+        </div> -->
+        <script type="text/javascript" src="/js/jquery-2.1.1.js"></script>
+        <script type="text/javascript" src="/js/d3.js"></script>
+        <script type="text/javascript" src="/js/numeral.js"></script>
+        <script type="text/javascript" src="/js/sunburst_rev.js"></script>
     </body>
 </html>
