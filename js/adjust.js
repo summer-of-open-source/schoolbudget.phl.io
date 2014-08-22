@@ -64,8 +64,24 @@ Datum.prototype.getDatumProperties = function(propName, array, depth){
         this.getDatumProperties(propName, array[this[depth]]["children"], depth+1); //this adds those children
 }
 
-Datum.prototype.updateParent = function(){
-    //update Tree will be moved here after it's been tested
+//accesses datum's parent in root and replaces all its properties with Datum's (which have presumably been changed)
+Datum.prototype.update = function(){
+    //for each property in datum, update the coresponding property in the tree
+    for(key in this){
+
+        if (isNaN(+key)){ //if key is not a number (numbered keys are part of the path, not updatable)
+            this.root["children"][this[0]]["children"][this[1]]["children"][this[2]]["children"][this[3]][key] = this[key];
+            
+            if (this[key] === "current" || this[key] === "next"){//if this is one of the keys that has children...
+                var midKey = this[key];
+                
+                for (key in this[midKey]){ //iterate them and add them
+                    this.root["children"][this[0]]["children"][this[1]]["children"][this[2]]["children"][this[3]][midKey][key] = this[midKey][key];
+                }
+            }
+        }
+
+    }
 };
 
 
@@ -317,30 +333,6 @@ function extractLines(root, criteria){
             };
 }
 
-//updates node on tree with properties on a matching datum object
-function updateTree(root, datum){
-
-    //for each property in datum, update the coresponding property in the tree
-    for(key in datum){
-
-        if (isNaN(+key)){ //if key is not a number (numbered keys are part of the path, not updatable)
-            root["children"][datum[0]]["children"][datum[1]]["children"][datum[2]]["children"][datum[3]][key] = datum[key];
-            
-            if (datum[key] === "current" || datum[key] === "next"){//if this is one of the keys that has children...
-                var midKey = datum[key];
-                
-                for (key in datum[midKey]){ //iterate them and add them
-                    root["children"][datum[0]]["children"][datum[1]]["children"][datum[2]]["children"][datum[3]][midKey][key] = datum[midKey][key];
-                }
-            }
-        }
-
-    }
-
-
-}
-
-
 // this method proportionally distributes amounts among lines matching the supplied conditions
 //toRemove = Query     toDistribute = Query     exclusions = [Exclusion]
 function distributeAmounts(root, toRemove, toDistribute, exclusions){
@@ -392,37 +384,8 @@ function distributeAmounts(root, toRemove, toDistribute, exclusions){
             newTotals[key] = datum[midKey][3][key.slice(5)];
         });
 
-        updateTree(root, datum); //applies changes to the actual element on the tree
+        datum.update(); //applies changes to the actual element on the tree
    });   
 
 }
-
-// // first pass through target lines -- sum existing amounts
-// $totals = array();
-// foreach ($lines AS $Line) {
-//     foreach ($columns AS $column) {
-//         $totals[$column] += $Line->$column; 
-//     }
-// }
-// //result: $totals contains 10 properties named after values in columnsCurrent/columnsProposed(i think)
-// //each contains the sum of all data items that meet conditions
-
-
-// // second pass -- distribute amounts proportionally
-// $newTotals = array(); //stores new totals
-// $defaultProportion = 1 / count($lines); //what to multiply each selected element by.  1 / #lines distributing to
-// foreach ($lines AS $Line) { //for each line in distribution lines
-//     foreach ($totals AS $column => $total) {  //for each total(contains summed totals with a matching key)
-//         if ($total) { //if a total evaluates to true...  meaning it is not zero, i think...  and why would the proportion change b/c of that?
-//             $proportion = $Line->$column / $total;// proportion = line[column] / total
-//         } else {//if total = 0?
-//             $proportion = $defaultProportion;//proportion = default
-//         }
-
-//         $Line->$column += round($amounts[$column] * $proportion, 2); //line[column] += (amounts[column] *proportion) rounded to 2nd place.  This is actually editing the value in the tree
-//         $newTotals[$column] += $Line->$column; //newTotals[column] += line[column]
-//         //summing new totals in newTotals object.  why? what are we doing with it after this?
-//     }
-//     $Line->save();//and what's this doing?  saving modifications to the line is my guess...
-// }
 
