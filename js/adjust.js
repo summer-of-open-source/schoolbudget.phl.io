@@ -306,7 +306,7 @@ function extractLines(root, criteria){
 
     return {    "curr_other": currentOtherTotals,
                 "curr_capital": currentCapitalTotals,
-                "curr_grants": currentGrantTotals,
+                "curr_grant": currentGrantTotals,
                 "curr_operating": currentOperatingTotals,
                 "curr_total": currentTotals,
                 "next_other": nextOtherTotals,
@@ -323,7 +323,7 @@ function updateTree(root, datum){
     //for each property in datum, update the coresponding property in the tree
     for(key in datum){
 
-        if (isNAN(+key)){ //if key is not a number (numbered keys are part of the path, not updatable)
+        if (isNaN(+key)){ //if key is not a number (numbered keys are part of the path, not updatable)
             root["children"][datum[0]]["children"][datum[1]]["children"][datum[2]]["children"][datum[3]][key] = datum[key];
             
             if (datum[key] === "current" || datum[key] === "next"){//if this is one of the keys that has children...
@@ -360,13 +360,11 @@ function distributeAmounts(root, toRemove, toDistribute, exclusions){
 
     // first pass through target lines -- sum existing amounts
    distributionDatums.forEach(function(datum, index, array){//for each distribution datum
-        //datum = value;
         keys.forEach(function(key, index, array){//for each key
-            //key = value;
             if (key.indexOf("next") > 0)
-                totals[key] += datum["next"][key.slice(5)];
+                totals[key] += datum["next"][3][key.slice(5)]; //note the three.  Look at a datum object's current/next in the console to see why.
             else
-                totals[key] += datum["current"][key.slice(5)];
+                totals[key] += datum["current"][3][key.slice(5)];
         });
    });
 
@@ -383,15 +381,15 @@ function distributeAmounts(root, toRemove, toDistribute, exclusions){
 
             //gets appropriate proportion
             if(totals[key] !== 0){//condition from import.php
-                proportion = datum[midKey][key.slice(5)] / totals[key];
+                proportion = datum[midKey][3][key.slice(5)] / totals[key];
             }
             else
                 proportion = defaultProportion;
 
             //assigns datum property to new value
-            datum[midKey][key.slice(5)] = (amounts[key] * proportion).toFixed(2);//rounds to 2 decimal places
+            datum[midKey][3][key.slice(5)] = (amounts[key] * proportion).toFixed(2);//rounds to 2 decimal places
             //also adds it to newTotals(remnant from import.php) 
-            newTotals[key] = datum[midKey][key.slice(5)];
+            newTotals[key] = datum[midKey][3][key.slice(5)];
         });
 
         updateTree(root, datum); //applies changes to the actual element on the tree
