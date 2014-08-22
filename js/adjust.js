@@ -40,29 +40,33 @@ function Exclusion(prop, val, depth){
 }
 
 //stores path (indices 0-3) and 4-levels associated properties (specified by propNames array)
-function Datum(index0, index1, index2, index3, propNames, root){
-    //Path.call(this, index0, index1, index2, index3);
-    this[0] = index0,
-    this[1] = index1,
-    this[2] = index2,
-    this[3] = index3
+function Datum(index0, index1, index2, index3, root){
+    Path.call(this, index0, index1, index2, index3);
 
-    if (Array.isArray(propNames) && root){ //if a root and an ARRAY of propNames is passed
-        this.root = root;
-        for (var i = 0; i < propNames.length; i++){//iterate each propName in list
-            this[propNames[i]] = {};//create a new property with that propName
-            this.getDatumProperties(propNames[i], root["children"], 0); //goes down 4 levels and fetches property values at each
-        }
+    this.propNames = ["name", "code", "current", "next"];
+    this.root = root;
+
+    for (var i = 0; i < this.propNames.length; i++){//iterate each propName in list
+        this[this.propNames[i]] = {};//create a new property with that propName
+        this.getDatumProperties(this.propNames[i], root["children"], 0); //goes down 4 levels and fetches property values at each
     }
+
 
     return this;
 }
 
+// gets a property and add it to parent object
+// repeats self until level 3 has been reached.  
+// at level three, it calls itself one last time to add nested elements (children of cuttent/next)
 Datum.prototype.getDatumProperties = function(propName, array, depth){
     this[propName][depth] = array[this[depth]][propName];
-    if (depth < 3)
-        this.getDatumProperties(propName, array[this[depth]]["children"], depth+1);
+    if (depth < 3) //if this is the lowest level, then these properties are  "current", and "next", and both have nested children
+        this.getDatumProperties(propName, array[this[depth]]["children"], depth+1); //this adds those children
 }
+
+Datum.prototype.updateParent = function(){
+    //update Tree will be moved here after it's been tested
+};
 
 
 
@@ -75,9 +79,9 @@ Datum.prototype.getDatumProperties = function(propName, array, depth){
 
 var miscAdjust1 = [ new Query("F21003", "F31620", "F49000", "5221", "code"), // Food Service > Allocated Costs
                     new Query("F21003", "F31620", "" , "", "code"), //Operating support group...
-                    new Exclusion("code", "F41071", 2), 
-                    new Exclusion("code", "5221", 3), 
-                    new Exclusion("code", "F41038", 2) 
+                    [   new Exclusion("code", "F41071", 2), 
+                        new Exclusion("code", "5221", 3), 
+                        new Exclusion("code", "F41038", 2)  ]
                 ];// Operating Support group, except Transportation -- Regular Services > Allocated Costs and Debt Service
 // distribute to: everything w/ function group F31620 but NOT if it has FUNCTION F41071 or ACTIVITY_CODE 5221 or FUNCTION F41038
 
@@ -168,15 +172,8 @@ function searchTree(root, searchQuery /*exclusions*/){
     if(Array.isArray(exclusions[0])) 
         exclusions = exclusions[0];
 
-    var typesExcluded = [];
-
-    //typesExcluded is used to tell the Datum objects what properties to store (for later comparison with excludes)
-    exclusions.forEach(function(value, index, array){
-        typesExcluded.push(value.prop);
-    });
-
     //***  first pass: makes a Datum object for each match in root, and adds it to paths  ***//
-    paths = include(paths, searchQuery, typesExcluded, root); //for later: make SearchQuery an array and iterate it.  Multiple inclusions!!!
+    paths = include(paths, searchQuery, root); //for later: make SearchQuery an array and iterate it.  Multiple inclusions!!!
 
     //****  Second pass:  iterates all exclusions and removes matches from paths  ****//
     exclusions.forEach(function(value, index, element){//for each exclusion in list...
@@ -186,11 +183,11 @@ function searchTree(root, searchQuery /*exclusions*/){
     return paths;
 }
 
-//needs access to inclusion, indices, paths, and typesExcluded (so datum object knows 
-//what data it needs to collect.  Said data will be compared to the exclusion objects later.)
-//doesn't currently check for duplicate data items as they're being added
-//you could potentially add the same data item multiple times
-function include(paths, inclusion, typesExcluded, root){
+//returns an array of (datum objects that reference) data that meets the criteteria passed in inclusion
+//doesn't currently check for duplicate data items as they're being added. 
+//(so, you could potentially add the same data item multiple times)
+//multiple inclusions currently not supported. 
+function include(paths, inclusion, root){
     var indices = new Path("", "", "", "", inclusion["prop"]);
 
     //recursively collects paths of all children/grandchildren/etc of passed value
@@ -202,43 +199,44 @@ function include(paths, inclusion, typesExcluded, root){
             indices[depth] = getIndex(inclusion["prop"], inclusion[depth], array);
             array[indices[depth]]["children"].forEach(collectNestedPaths);
         }
-        else{ 
+        else{ //if this IS the lowest level
             indices[depth] = getIndex(inclusion["prop"], inclusion[depth], array);
-            paths.push(new Datum(indices[0], indices[1], indices[2], indices[3], typesExcluded, root));
+            paths.push(new Datum(indices[0], indices[1], indices[2], indices[3], root));
         }
     }
 
     //tests each index in inclusion.  
-        //if there is a value, and this is the LAST ONE, create a path for that value and add it to paths
-        //If there is a value, and this ISN'T the LAST ONE, test the next value.
-        //else, if there is NO VALUE, add paths of all nested data items from that point down via collectNestedPaths
+        //(1)if there is a value, and this is the LAST ONE, create a path for that value and add it to paths
+        //(2) If there is a value, and this ISN'T the LAST ONE, test the next value.
+        //(3) else, if there is NO VALUE, add paths of all nested data items from that point down via collectNestedPaths
     if (inclusion[0].length > 0){ 
-        indices[0] = getIndex(inclusion["prop"], inclusion[0], root["children"]);
+        indices[0] = getIndex(inclusion["prop"], inclusion[0], root["children"]); //(2)
 
-        if(inclusion[1].length > 0){ 
+        if(inclusion[1].length > 0){ //(2)
             indices[1] = getIndex(inclusion["prop"], inclusion[1], root["children"][indices[0]]["children"]);     
 
-            if(inclusion[2].length > 0){ 
+            if(inclusion[2].length > 0){ //(2)
                 indices[2] = getIndex(inclusion["prop"], inclusion[2], root["children"][indices[0]]["children"][indices[1]]["children"]);
                 
-                    if(inclusion[3].length > 0){ 
+                    if(inclusion[3].length > 0){ //(1) path is complete (has 4 indices) and is added to paths
                         indices[3] = getIndex(inclusion["prop"], inclusion[3], root["children"][indices[0]]["children"][indices[1]]["children"][indices[2]]["children"]);
+                        paths.push(new Datum(indices[0], indices[1], indices[2], indices[3], root));
                     }
-                    else{ 
+                    else{ //(3)
                         root["children"][indices[0]]["children"][indices[1]]["children"][indices[2]]["children"].forEach(collectNestedPaths);
                     }
             }
-            else{ 
+            else{ //(3)
                 root["children"][indices[0]]["children"][indices[1]]["children"].forEach(collectNestedPaths);
             }
        
         }
-        else{ 
+        else{ //(3)
             root["children"][indices[0]]["children"].forEach(collectNestedPaths);
         }
 
     }
-    else{ //gets paths of all nested children
+    else{ //(3) adds paths of all nested children to array
         root["children"].forEach(collectNestedPaths);
     }
 
@@ -249,11 +247,12 @@ function include(paths, inclusion, typesExcluded, root){
 function exclude(paths, exclusion){
     var currentPath;
 
+    //condenses a sparse array
     function condenseArray(sparseArray){
         var condensedArray = [];
         sparseArray.forEach(function(value, index, element){
             if (value) //if value is not undefined, null, or NAN
-                condensedArray.push(value);
+                condensedArray.push(value); //push it to the condensed array
         });
         return condensedArray;
     }
@@ -268,12 +267,15 @@ function exclude(paths, exclusion){
     return paths;
 }
 
-
 // this method removes lines matching the supplied conditions and returns their totals
 function extractLines(root, criteria){
     var currentGrantTotals = 0, currentOperatingTotals = 0, currentTotals = 0, currentOtherTotals = 0, currentCapitalTotals = 0;
     var nextGrantTotals = 0, nextOperatingTotals = 0, nextTotals = 0, nextOtherTotals = 0, nextCapitalTotals = 0;
     var path, datum; 
+
+    if (!Array.isArray(criteria)){//makes it possible to pass criteria as an array, or if there's only one, as a single arg
+        criteria = [criteria]
+    }
 
     criteria.forEach(function(value, index, array){ //first pass - collecting totals
         path = findPath(root, array[index]);
@@ -301,35 +303,48 @@ function extractLines(root, criteria){
         catch(e){}
     });
 
-    return {    "currentOtherTotals": currentOtherTotals,
-                "currentCapitalTotals": currentCapitalTotals,
-                "currentGrantTotals": currentGrantTotals,
-                "currentOperatingTotals": currentOperatingTotals,
-                "currentTotals": currentTotals,
-                "nextOtherTotals": nextOtherTotals,
-                "nextCapitalTotals": nextCapitalTotals,
-                "nextGrantTotals": nextGrantTotals,
-                "nextOperatingTotals": nextOperatingTotals,
-                "nextTotals": nextTotals
+    return {    "curr_other": currentOtherTotals,
+                "curr_capital": currentCapitalTotals,
+                "curr_grants": currentGrantTotals,
+                "curr_operating": currentOperatingTotals,
+                "curr_total": currentTotals,
+                "next_other": nextOtherTotals,
+                "next_capital": nextCapitalTotals,
+                "next_grant": nextGrantTotals,
+                "next_operating": nextOperatingTotals,
+                "next_total": nextTotals
             };
 }
 
 //updates node on tree with properties on a matching datum object
-function updateTree(datum, key){
-    datum["root"]["children"][datum[0]]["children"][datum[1]]["children"][datum[2]]["children"][datum[3]]
+function updateTree(root, datum){
 
-    newVal = datum[key]; //note to self - make sure all children of current/next get updated!!
+    //for each property in datum, update the coresponding property in the tree
+    for(key in datum){
+
+        if (isNAN(+key)){ //if key is not a number (numbered keys are part of the path, not updatable)
+            root["children"][datum[0]]["children"][datum[1]]["children"][datum[2]]["children"][datum[3]][key] = datum[key];
+            
+            if (datum[key] === "current" || datum[key] === "next"){//if this is one of the keys that has children...
+                var midKey = datum[key];
+                
+                for (key in datum[midKey]){ //iterate them and add them
+                    root["children"][datum[0]]["children"][datum[1]]["children"][datum[2]]["children"][datum[3]][midKey][key] = datum[midKey][key];
+                }
+            }
+        }
+
+    }
 
 
 }
-
 
 
 // this method proportionally distributes amounts among lines matching the supplied conditions
 //toRemove = Query     toDistribute = Query     exclusions = [Exclusion]
 function distributeAmounts(root, toRemove, toDistribute, exclusions){
     var amounts = extractLines(root, toRemove); 
-    var keys = Object.keys(amounts); //contains keys (currentGrantTotals, currentTotals, etc)
+    var keys = Object.keys(amounts); //contains keys (curr_total, next_grant, etc)  use key.slice(5) to access matching property in datum
     var distributionDatums = searchTree(root, toDistribute, exclusions); 
 
     var proportion, defaultProportion = 1 / distributionDatums.length;
@@ -348,33 +363,37 @@ function distributeAmounts(root, toRemove, toDistribute, exclusions){
         keys.forEach(function(key, index, array){//for each key
             //key = value;
             if (key.indexOf("next") > 0)
-                totals[key] += datum["next"][key];
+                totals[key] += datum["next"][key.slice(5)];
             else
-                totals[key] += datum["current"][key];
+                totals[key] += datum["current"][key.slice(5)];
         });
    });
 
     // second pass -- distribute amounts proportionally
     distributionDatums.forEach(function(datum, index, array){//for each distribution datum
-        //datum = value;
+
         keys.forEach(function(key, index, array){//for each key
-            //key = value;
-            var midKey;
-            if (key.indexOf("next") > 0)
+
+            var midKey;//"current" or "next"
+            if (key.indexOf("next") >= 0)
                 midKey = "next";
             else
                 midKey = "current";
 
-            if(totals[key] !== 0){
-                proportion = datum[midKey][key] / totals[key];
+            //gets appropriate proportion
+            if(totals[key] !== 0){//condition from import.php
+                proportion = datum[midKey][key.slice(5)] / totals[key];
             }
             else
                 proportion = defaultProportion;
 
-
-            datum[midKey][key] = (amounts[key] * proportion, -2).toFixed(2);//rounds to 2 decimal places
-            newTotals[key] = datum[midKey][key];
+            //assigns datum property to new value
+            datum[midKey][key.slice(5)] = (amounts[key] * proportion).toFixed(2);//rounds to 2 decimal places
+            //also adds it to newTotals(remnant from import.php) 
+            newTotals[key] = datum[midKey][key.slice(5)];
         });
+
+        updateTree(root, datum); //applies changes to the actual element on the tree
    });   
 
 }

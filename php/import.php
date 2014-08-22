@@ -132,11 +132,11 @@ if (!empty($_FILES['budget'])) {
 
     // this method proportionally distributes amounts among lines matching the supplied conditions
     $distributeAmounts = function($amounts, $conditions) use ($generateWhere) {
-        $columns = array_keys($amounts);
-        $lines = NormalizedBudgetLine::getAllByWhere($generateWhere($conditions));
+        $columns = array_keys($amounts); //columns contains keys for amounts (summed totals from extractLines)
+        $lines = NormalizedBudgetLine::getAllByWhere($generateWhere($conditions)); //lines contains keys from Normalized Budget Line?
 
         // first pass through target lines -- sum existing amounts
-        $totals = array();
+        $totals = array(); 
         foreach ($lines AS $Line) {
             foreach ($columns AS $column) {
                 $totals[$column] += $Line->$column; 
@@ -161,7 +161,7 @@ if (!empty($_FILES['budget'])) {
                 $newTotals[$column] += $Line->$column; //newTotals[column] += line[column]
                 //summing new totals in newTotals object.  why? what are we doing with it after this?
             }
-            $Line->save();//and what's this doing?
+            $Line->save();//and what's this doing?  saving modifications to the line is my guess...
         }
     };
 

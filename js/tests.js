@@ -42,30 +42,43 @@ function runTests(){
      //  console.log(findPath(tree, miscCodes[i]));
      // }
 
-     console.log("**** extractLines Test ****");
-     console.log(extractLines(tree, miscCodes));
+     // console.log("**** extractLines Test ****");
+     // console.log(extractLines(tree, miscCodes));
 
-     // console.log("***** Datum object tests ******")
-     // var datums = [  new Datum(0, 2, 3, 7, ["code", "name"], tree),
-     //              new Datum(3, 0, 0, 3, ["code", "name", "depth"], tree), 
-     //              new Datum(3, 0, 0, 0, ["code", "name"], tree)
-     // ];
+     // console.log("***** Datum object tests ******") //before propNames arg was taken out
+     // var datums = [    new Datum(0, 2, 3, 7, ["code", "name"], tree),
+     //                   new Datum(3, 0, 0, 3, ["code", "name", "depth"], tree), 
+     //                   new Datum(3, 0, 0, 0, ["code", "name"], tree),
+     //                   new Datum(0, 2, 3, 7, ["code", "name", "current", "next"], tree),
+     //      ];
      // console.log(datums);
 
-     // test searchTree: exclusions passed individually
-     searchCodes.forEach(function(value, index, array){
-          if (Object.keys(value).length === 1) //no exclusions
-               console.log(searchTree(tree, value["query"]));
-          else if (Object.keys(value).length === 2) //1 exclusion
-               console.log(searchTree(tree, value["query"], value["ex1"]));
-          else if (Object.keys(value).length === 3) //2 exclusions
-               console.log(searchTree(tree, value["query"], value["ex1"], value["ex2"]));
-     });
+     console.log("***** Datum object tests ******")
+     var datums = [    new Datum(0, 2, 3, 7, tree),
+                       new Datum(3, 0, 0, 3, tree), 
+                       new Datum(3, 0, 0, 0, tree),
+                       new Datum(0, 2, 3, 7, tree),
+          ];
+     console.log(datums);
+
+     // // test searchTree: exclusions passed individually
+     // searchCodes.forEach(function(value, index, array){
+     //      if (Object.keys(value).length === 1) //no exclusions
+     //           console.log(searchTree(tree, value["query"]));
+     //      else if (Object.keys(value).length === 2) //1 exclusion
+     //           console.log(searchTree(tree, value["query"], value["ex1"]));
+     //      else if (Object.keys(value).length === 3) //2 exclusions
+     //           console.log(searchTree(tree, value["query"], value["ex1"], value["ex2"]));
+     // });
 
      // test searchTree: exclusions passed as arrays   
      arraySearchCodes.forEach(function(value, index, array){
           console.log(searchTree(tree, value["query"], value["excludes"]));
      });
+
+     // test distributeAmounts: exclusions passed as arrays   
+     // distributeAmounts(tree, miscAdjust1[0], miscAdjust1[1], miscAdjust1[2]);
+
 
 }
 
