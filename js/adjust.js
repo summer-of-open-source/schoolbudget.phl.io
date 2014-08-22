@@ -157,15 +157,20 @@ function findDatum(root, query, props){
 
 //searches tree for all nodes matching passed critera
 //returns array of paths(4-element arrays of datum objects) that fit the criteria
-//can only accept 1 inclusion, but can accept multiple exclusions
+//can only accept 1 inclusion, but can accept multiple exclusions, either as an array or individually
 function searchTree(root, searchQuery /*exclusions*/){
-
     var paths = [];
     var indices = new Path("", "", "", "", searchQuery["prop"]);
+
     var exclusions = Array.prototype.slice.call(arguments, 2) || [];
+
+    //handles if the exclusions were passed as an ARRAY of exclusions
+    if(Array.isArray(exclusions[0])) 
+        exclusions = exclusions[0];
+
     var typesExcluded = [];
 
-    //ensures that whatever types are going to be excluded will be included in datum objects for testing
+    //typesExcluded is used to tell the Datum objects what properties to store (for later comparison with excludes)
     exclusions.forEach(function(value, index, array){
         typesExcluded.push(value.prop);
     });

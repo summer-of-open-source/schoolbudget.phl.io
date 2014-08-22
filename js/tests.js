@@ -37,6 +37,11 @@ var searchCodes = [ {"query": new Query("F21001", "F49021", "F49027", "", "code"
                     {"query": new Query("F21003", "F31620", "" , "", "code"), "ex1": new Exclusion("code", "F41071", 2), "ex2":new Exclusion("code", "5221", 3)}
                 ];
 
+var arraySearchCodes = [ {"query": new Query("F21003", "F31620", "F41071", "", "code"), "excludes": [new Exclusion("name", "School Budgets including Non-District Operated Schools", 0)]},
+                         {"query": new Query("F21003", "F31620", "F41071", "", "code"), "excludes": [new Exclusion("code", "2725", 3), new Exclusion("code", "2746", 3)]}, //should return empty array
+                         {"query": new Query("F21003", "F31620", "" , "", "code"), "excludes": [new Exclusion("code", "F41071", 2), new Exclusion("code", "5221", 3)]}
+                    ];
+
 
 //needs to be converted to pathQuery objects
 var gapClosingAmounts = [{  "FUNCTION" : "F49992", "ACTIVITY_CODE" : "114A"    }, // Budget Reductions - Instructional & Instructional Support
@@ -65,7 +70,7 @@ function runTests(){
      // ];
      // console.log(datums);
 
-     //test searchTree     
+     // test searchTree: exclusions passed individually
      // searchCodes.forEach(function(value, index, array){
      //      if (Object.keys(value).length === 1) //no exclusions
      //           console.log(searchTree(tree, value["query"]));
@@ -74,6 +79,11 @@ function runTests(){
      //      else if (Object.keys(value).length === 3) //2 exclusions
      //           console.log(searchTree(tree, value["query"], value["ex1"], value["ex2"]));
      // });
+
+     // test searchTree: exclusions passed as arrays   
+     arraySearchCodes.forEach(function(value, index, array){
+          console.log(searchTree(tree, value["query"], value["excludes"]));
+     });
 
 }
 
