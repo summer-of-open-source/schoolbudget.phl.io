@@ -53,15 +53,12 @@ function runTests(){
      //      ];
      // console.log(datums);
 
-     console.log("***** Datum object tests ******")
-     var datums = [    new Datum(0, 2, 3, 7, tree),
-                       new Datum(3, 0, 0, 3, tree), 
-                       new Datum(3, 0, 0, 0, tree),
-                       new Datum(0, 2, 3, 7, tree),
-          ];
-
-     console.log(datums[0]);
-     console.log(datums[0].toString());
+     // console.log("***** Datum object tests ******")
+     // var datums = [    new Datum(0, 2, 3, 7, tree),
+     //                   new Datum(3, 0, 0, 3, tree), 
+     //                   new Datum(3, 0, 0, 0, tree),
+     //                   new Datum(0, 2, 3, 7, tree),
+     //      ];
 
      // console.log("**********  Testing Datum's Update Method  **********")
      // console.log("*****  BEFORE  *****");
@@ -70,10 +67,10 @@ function runTests(){
      // });
 
      // datums.forEach(function(datum, index, array){
-     //      datum["name"] = "Vanilla";
-     //      datum["code"] = "Chocolate";
-     //      datum["current"] = "Strawberry";
-     //      datum["next"] = "Mint";
+     //      datum["name"][0] = "Vanilla";
+     //      datum["code"][0] = "Chocolate";
+     //      datum["current"][3]["total"] = "Strawberry";
+     //      datum["next"][3]["total"] = "Mint";
      //      datum.update();
      // });
 

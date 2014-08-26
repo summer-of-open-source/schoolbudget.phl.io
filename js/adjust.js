@@ -86,7 +86,8 @@ Datum.prototype.update = function(){
 
 //Returns description of Datum as a string
 Datum.prototype.toString = function(){
-    var stringified = "**** Datum Object****\n\nPath: " + this[0] + ", " + this[1] + ", " + this[2] + ", " + this[3] + "\n";
+    var stringified = "**** Datum Object****\n\n"
+    stringified += "Path: " + this[0] + ", " + this[1] + ", " + this[2] + ", " + this[3] + "\n";
 
     for (key in this){
 
