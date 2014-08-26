@@ -96,9 +96,13 @@ function runTests(){
      //      console.log(searchTree(tree, value["query"], value["excludes"]));
      // });
 
-     // test distributeAmounts: exclusions passed as arrays   
-     //distributeAmounts(tree, miscAdjust1[0], miscAdjust1[1], miscAdjust1[2]);
+     //test distributeAmounts: exclusions passed as arrays   
+     //note: graph won't change at this point b/c tests is being called after main
+     // distributeAmounts(tree, miscAdjust1[0], miscAdjust1[1], miscAdjust1[2]);
 
+
+     //test makeAdjustments
+     makeAdjustments(tree);
 
 }
 

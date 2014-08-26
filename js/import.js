@@ -142,7 +142,7 @@ function parseNestedCSV() {
 
         });
 
-    //this happens before everything in the callback!!
+    //this happens BEFORE everything in the callback!!
     console.log("********  NESTED TREE  *******");
     console.log(tree); 
     return tree;
