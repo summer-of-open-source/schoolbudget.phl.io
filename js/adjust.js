@@ -48,7 +48,7 @@ function Datum(index0, index1, index2, index3, root){
 
     for (var i = 0; i < this.propNames.length; i++){//iterate each propName in list
         this[this.propNames[i]] = {};//create a new property with that propName
-        this.getDatumProperties(this.propNames[i], root["children"], 0); //goes down 4 levels and fetches property values at each
+        this.createDatumProperties(this.propNames[i], root["children"], 0); //goes down 4 levels and fetches property values at each
     }
 
 
@@ -58,10 +58,10 @@ function Datum(index0, index1, index2, index3, root){
 // gets a property and add it to parent object
 // repeats self until level 3 has been reached.  
 // at level three, it calls itself one last time to add nested elements (children of cuttent/next)
-Datum.prototype.getDatumProperties = function(propName, array, depth){
+Datum.prototype.createDatumProperties = function(propName, array, depth){
     this[propName][depth] = array[this[depth]][propName];
     if (depth < 3) //if this is the lowest level, then these properties are  "current", and "next", and both have nested children
-        this.getDatumProperties(propName, array[this[depth]]["children"], depth+1); //this adds those children
+        this.createDatumProperties(propName, array[this[depth]]["children"], depth+1); //this adds those children
 }
 
 //accesses datum's parent in root and replaces all its properties with Datum's (which have presumably been changed)
@@ -84,6 +84,37 @@ Datum.prototype.update = function(){
     }
 };
 
+//Returns description of Datum as a string
+Datum.prototype.toString = function(){
+    var stringified = "**** Datum Object****\n\nPath: " + this[0] + ", " + this[1] + ", " + this[2] + ", " + this[3] + "\n";
+
+    for (key in this){
+
+        if (!(this[key] instanceof Function || key === "root" || !isNaN(key))){ //skips functions, root, and indices
+
+            if (this[key] instanceof Array){//if this key contains an array (notably the propNames property)
+                stringified += key + ":  " + this[key].toString() + "\n";
+            }
+            else if (key === "current" || key === "next"){ //if this is one of the keys with nested properties that only exists on level 3
+                var index = 3;
+                stringified += key + " (level 3 only): \n";
+                for (lowerKey in this[key][index]){
+                    stringified += "\t\t" + lowerKey + ":  " + this[key][index][lowerKey] + "\n";  
+                }
+            }
+            else {
+               stringified += key + ":\t"; //adds key name plus a tab
+
+                for (index in this[key]){//prints values for each level (4 vals for code, name, etc)
+                    if (index > 0)
+                        stringified += "\t\t";
+                    stringified += index + ":  " + this[key][index] + "\n";
+                }
+            }
+        }
+    }
+    return stringified;
+};
 
 
 /*******  Variables  *********/
