@@ -282,6 +282,8 @@ function exclude(paths, exclusion){
 }
 
 // this method removes lines matching the supplied conditions and returns their totals
+// criteria is a query object which may have empty values at properties 0 - 3 and below
+// if, for example, the value at index 2 is blank, all nested elements with that value will be totaled and removed
 function extractLines(root, criteria){
     var currentGrantTotals = 0, currentOperatingTotals = 0, currentTotals = 0, currentOtherTotals = 0, currentCapitalTotals = 0;
     var nextGrantTotals = 0, nextOperatingTotals = 0, nextTotals = 0, nextOtherTotals = 0, nextCapitalTotals = 0;

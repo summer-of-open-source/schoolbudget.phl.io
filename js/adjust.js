@@ -2,6 +2,55 @@
 /************ Budgetary Adjustments ************/
 /***********************************************/
 
+// this method removes lines matching the supplied conditions and returns their totals
+// criteria is a query object which may have empty values at properties 0 - 3 and below
+// if, for example, the value at index 2 is blank, all nested elements with that value will be totaled and removed
+function extractLines(root, criteria){
+    var currentGrantTotals = 0, currentOperatingTotals = 0, currentTotals = 0, currentOtherTotals = 0, currentCapitalTotals = 0;
+    var nextGrantTotals = 0, nextOperatingTotals = 0, nextTotals = 0, nextOtherTotals = 0, nextCapitalTotals = 0;
+    var path, datum; 
+
+    if (!Array.isArray(criteria)){//makes it possible to pass criteria as an array, or if there's only one, as a single arg
+        criteria = [criteria]
+    }
+
+    criteria.forEach(function(value, index, array){ //first pass - collecting totals
+        datum = findDatum(root, array[index]);
+
+        currentCapitalTotals += datum["current"][3]["capital"];
+        currentOtherTotals += datum["current"][3]["other"];
+        currentGrantTotals += datum["current"][3]["grant"];
+        currentOperatingTotals += datum["current"][3]["operating"];
+        currentTotals += datum["current"][3]["total"];
+
+        nextCapitalTotals += datum["current"][3]["capital"];
+        nextOtherTotals += datum["current"][3]["other"];
+        nextGrantTotals += datum["next"][3]["grant"];
+        nextOperatingTotals += datum["next"][3]["operating"];
+        nextTotals += datum["next"][3]["total"];
+    });
+    
+    criteria.forEach(function(value, index, array){ //second pass - removing properties
+        try{//because node may've been deleted already
+            path = findPath(root, array[index]);
+            //have to use long path because we're actually editing the tree here
+            root["children"][path[0]]["children"][path[1]]["children"][path[2]]["children"].splice(path[3], 1);
+        }
+        catch(e){}
+    });
+
+    return {    "curr_other": currentOtherTotals,
+                "curr_capital": currentCapitalTotals,
+                "curr_grant": currentGrantTotals,
+                "curr_operating": currentOperatingTotals,
+                "curr_total": currentTotals,
+                "next_other": nextOtherTotals,
+                "next_capital": nextCapitalTotals,
+                "next_grant": nextGrantTotals,
+                "next_operating": nextOperatingTotals,
+                "next_total": nextTotals
+            };
+}
 
 // this method proportionally distributes amounts among lines matching the supplied conditions
 //toRemove = Query     toDistribute = Query     exclusions = [Exclusion]
@@ -57,6 +106,76 @@ function distributeAmounts(root, toRemove, toDistribute, exclusions){
 
         datum.update(); //applies changes to the actual element on the tree
    });   
+
+}
+
+
+var gapClosingAmounts = [   new Query("F21004", "F31362", "F49992", "114A", "code"), // Budget Reductions - Instructional & Instructional Support
+                            new Query("F21004", "F31362", "F49995", "114C", "code"), // Budget Reductions - Operating Support
+                            new Query("F21004", "F31362", "F49994", "114E", "code"), // Budget Reductions - Administration
+                            new Query("F21004", "F31362", "F49991", "114B", "code"), // Budget Reductions - Pupil & Family Support
+                            new Query("F21005", "F31999", "F41073", "5999", "code"), // Undistributed Budgetary Adjustments - Other
+                            new Query("F21005", "F31999", "F41073", "5221", "code"), // Undistributed Budgetary Adjustments - Other
+                            new Query("F21005", "F31999", "F41073", "5130", "code"), // Undistributed Budgetary Adjustments - Other
+                            new Query("F21005", "F31999", "F41073", "2817", "code")  // Undistributed Budgetary Adjustments - Other
+                        ];
+
+var gapDistributionSchools = [ {"query": new Query("F21003", "F31330", "", "", "code")}  // District Operated Schools - Instructional
+                                {"query": new Query("F21003", "F31350", "", "", "code")}, // District Operated Schools - Instructional Support
+                                {"query": new Query("F21003", "F31620", "", "", "code"), "excludes": new Exclusion("code", "F41038", 2) }, // District Operated Schools - Operational Support
+                                {"query": new Query("F21003", "F31360", "", "", "code") // District Operated Schools - Pupil - Family Support
+                            ];
+
+var gapDistributionAdministrative = new Query("F21001", "", "", "", "code"); // Administrative Support Operations
+
+
+
+
+//From import.php
+
+    // split up gap closing / undistributed budgetary adjustments for District Operated Schools and Administrative budget lines by SDP-estimated ratios
+    // $gapClosingAmountsSchools = array();
+    // $gapClosingAmountsAdministrative = array();
+
+    // foreach ($gapClosingAmounts AS $column => $amount) {
+    //     if (in_array($column, $valueColumnsCurrent)) {
+    //         $gapClosingAmountsSchools[$column] = round($amount * 0.95183129854, 2); // 95.18% distribution of FY14 funds to schools
+    //         $gapClosingAmountsAdministrative[$column] = $amount - $gapClosingAmountsSchools[$column];
+    //     } elseif (in_array($column, $valueColumnsProposed)) {
+    //         $gapClosingAmountsSchools[$column] = round($amount * 0.95441584049, 2); // 95.18% distribution of FY15 funds to schools
+    //         $gapClosingAmountsAdministrative[$column] = $amount - $gapClosingAmountsSchools[$column];
+    //     } else {
+    //         throw new Exception('Unexpected column');
+    //     }
+    // }
+
+    // distribute split amounts
+    $distributeAmounts($gapClosingAmountsSchools, [
+        ['FunctionGroup' => 'F31330']   // District Operated Schools - Instructional
+        ,['FunctionGroup' => 'F31350']  // District Operated Schools - Instructional Support
+        ,['FunctionGroup' => 'F31620', 'Function != "F41038"']  // District Operated Schools - Operational Support
+        ,['FunctionGroup' => 'F31360']  // District Operated Schools - Pupil - Family Support
+    ]);
+
+    $distributeAmounts($gapClosingAmountsAdministrative, [
+        ['FunctionClass' => 'F21001'] // Administrative Support Operations
+    ]);
+
+function gapClosingAmounts(){
+
+
+
+    var gapClosingAmountsSchools = [];
+    var gapClosingAmountsAdministrative = [];
+
+
+
+    //note: can't use distributeAmounts as it is.  it would do all the adding we did above over again.  
+    //must revise distributeAmounts or make some of its innards available to gapClosingAmounts too
+    distributeAmounts(root, gapClosingAmountsSchools, gapDistributionSchools)
+
+    distributeAmounts(root, gapClosingAmountsAdministrative, gapDistributionAdministrative)
+
 
 }
 

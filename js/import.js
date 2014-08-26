@@ -125,7 +125,7 @@ function parseNestedCSV() {
                 tree["children"][name00]["children"][name01]["children"][name02]["children"][name03] = makeNode(i, d, keys); 
             }
             else{ //there are some data items on the lowest level that share the same name as another.  On higher levels they would be nested.  here we have to just add them.
-                var l = 2; //I know the name exists 1 time, so start at 2
+                var l = 2; //we know the name exists 1 time, so start at 2
                 while(tree["children"][name00]["children"][name01]["children"][name02]["children"][name03.concat(l)]){
                     l++;
                 }
