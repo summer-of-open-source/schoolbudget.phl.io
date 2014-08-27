@@ -54,36 +54,50 @@ function Datum(index0, index1, index2, index3, root){
         this._initializeDatumProperties(this.propNames[i], root["children"], 0); //goes down 4 levels and fetches property values at each
     }
 
-
     return this;
 }
 
 // gets a property and add it to parent object
 // repeats self until level 3 has been reached.  
 // at level three, it calls itself one last time to add nested elements (children of cuttent/next)
-Datum.prototype._initializeDatumProperties = function(propName, array, depth){
-    this[propName][depth] = array[this[depth]][propName];
-    if (depth < 3) //if this is the lowest level, then these properties are  "current", and "next", and both have nested children
-        this._initializeDatumProperties(propName, array[this[depth]]["children"], depth+1); //this adds those children
+Datum.prototype._initializeDatumProperties = function(propName, array, index){
+    this[propName][index] = array[this[index]][propName];
+    if (index < 3) //if this is the lowest level, then these properties are  "current", and "next", and both have nested children
+        this._initializeDatumProperties(propName, array[this[index]]["children"], index+1); //this adds those children
 }
 
+//iterate through all 4 levels of root, and change the property "propName" to its equivalent in Datum.
+//Note: WILL ONLY CHANGE PROPERTY VALUES AT INDEX/DEPTH 3 RIGHT NOW, because changing property values higher up will 
+//change values for all nested elements too.  All existing datums with those elements as parents would 
+//have to update themselves for that to be useful.  This is a feature for the future.
+Datum.prototype._updateDatumProperties = function(propName, array, indexLevel){
+    if (indexLevel === 3){
+        array[this[indexLevel]][propName] = this[propName][indexLevel];
+    }
+    else{
+        this._updateDatumProperties(propName, array[this[indexLevel]]["children"], indexLevel+1);
+    }
+
+
+}
 //accesses datum's parent in root and replaces all its properties with Datum's (which have presumably been changed)
 Datum.prototype.update = function(){
-    //for each property in datum, update the coresponding property in the tree
-    for(key in this){
+    //for each property in datum, update the coresponding property in the tree 
 
-        if (isNaN(+key)){ //if key is not a number (numbered keys are part of the path, not updatable)
-            this.root["children"][this[0]]["children"][this[1]]["children"][this[2]]["children"][this[3]][key] = this[key];
+    for(key in this){
+        //*** future!  make this a little less clunky.  maybe use an "updatable properties" array
+        if (isNaN(+key) && !((key==="propNames") || (key==="root"))){ //if key is not a number (numbered keys are part of the path, not updatable)
+            this._updateDatumProperties(key, this.root["children"], 0)
+            //this.root["children"][this[0]]["children"][this[1]]["children"][this[2]]["children"][this[3]][key] = this[key];
             
             if (this[key] === "current" || this[key] === "next"){//if this is one of the keys that has children...
                 var midKey = this[key];
-                
-                for (key in this[midKey]){ //iterate them and add them
+
+                for (key in this[midKey]){ 
                     this.root["children"][this[0]]["children"][this[1]]["children"][this[2]]["children"][this[3]][midKey][key] = this[midKey][key];
                 }
             }
         }
-
     }
 };
 
@@ -284,50 +298,50 @@ function exclude(paths, exclusion){
 // this method removes lines matching the supplied conditions and returns their totals
 // criteria is a query object which may have empty values at properties 0 - 3 and below
 // if, for example, the value at index 2 is blank, all nested elements with that value will be totaled and removed
-function extractLines(root, criteria){
-    var currentGrantTotals = 0, currentOperatingTotals = 0, currentTotals = 0, currentOtherTotals = 0, currentCapitalTotals = 0;
-    var nextGrantTotals = 0, nextOperatingTotals = 0, nextTotals = 0, nextOtherTotals = 0, nextCapitalTotals = 0;
-    var path, datum; 
+// function extractLines(root, criteria){
+//     var currentGrantTotals = 0, currentOperatingTotals = 0, currentTotals = 0, currentOtherTotals = 0, currentCapitalTotals = 0;
+//     var nextGrantTotals = 0, nextOperatingTotals = 0, nextTotals = 0, nextOtherTotals = 0, nextCapitalTotals = 0;
+//     var path, datum; 
 
-    if (!Array.isArray(criteria)){//makes it possible to pass criteria as an array, or if there's only one, as a single arg
-        criteria = [criteria]
-    }
+//     if (!Array.isArray(criteria)){//makes it possible to pass criteria as an array, or if there's only one, as a single arg
+//         criteria = [criteria]
+//     }
 
-    criteria.forEach(function(value, index, array){ //first pass - collecting totals
-        //path = findDatum(root, array[index]);
-        datum = findDatum(root, array[index]);
+//     criteria.forEach(function(value, index, array){ //first pass - collecting totals
+//         //path = findDatum(root, array[index]);
+//         datum = findDatum(root, array[index]);
 
-        currentCapitalTotals += datum["current"][3]["capital"];
-        currentOtherTotals += datum["current"][3]["other"];
-        currentGrantTotals += datum["current"][3]["grant"];
-        currentOperatingTotals += datum["current"][3]["operating"];
-        currentTotals += datum["current"][3]["total"];
+//         currentCapitalTotals += datum["current"][3]["capital"];
+//         currentOtherTotals += datum["current"][3]["other"];
+//         currentGrantTotals += datum["current"][3]["grant"];
+//         currentOperatingTotals += datum["current"][3]["operating"];
+//         currentTotals += datum["current"][3]["total"];
 
-        nextCapitalTotals += datum["current"][3]["capital"];
-        nextOtherTotals += datum["current"][3]["other"];
-        nextGrantTotals += datum["next"][3]["grant"];
-        nextOperatingTotals += datum["next"][3]["operating"];
-        nextTotals += datum["next"][3]["total"];
-    });
+//         nextCapitalTotals += datum["current"][3]["capital"];
+//         nextOtherTotals += datum["current"][3]["other"];
+//         nextGrantTotals += datum["next"][3]["grant"];
+//         nextOperatingTotals += datum["next"][3]["operating"];
+//         nextTotals += datum["next"][3]["total"];
+//     });
     
-    criteria.forEach(function(value, index, array){ //second pass - removing properties
-        try{//because node may've been deleted already
-            path = findPath(root, array[index]);
-            //have to use long path because we're actually editing the tree here
-            root["children"][path[0]]["children"][path[1]]["children"][path[2]]["children"].splice(path[3], 1);
-        }
-        catch(e){}
-    });
+//     criteria.forEach(function(value, index, array){ //second pass - removing properties
+//         try{//because node may've been deleted already
+//             path = findPath(root, array[index]);
+//             //have to use long path because we're actually editing the tree here
+//             root["children"][path[0]]["children"][path[1]]["children"][path[2]]["children"].splice(path[3], 1);
+//         }
+//         catch(e){}
+//     });
 
-    return {    "curr_other": currentOtherTotals,
-                "curr_capital": currentCapitalTotals,
-                "curr_grant": currentGrantTotals,
-                "curr_operating": currentOperatingTotals,
-                "curr_total": currentTotals,
-                "next_other": nextOtherTotals,
-                "next_capital": nextCapitalTotals,
-                "next_grant": nextGrantTotals,
-                "next_operating": nextOperatingTotals,
-                "next_total": nextTotals
-            };
-}
+//     return {    "curr_other": currentOtherTotals,
+//                 "curr_capital": currentCapitalTotals,
+//                 "curr_grant": currentGrantTotals,
+//                 "curr_operating": currentOperatingTotals,
+//                 "curr_total": currentTotals,
+//                 "next_other": nextOtherTotals,
+//                 "next_capital": nextCapitalTotals,
+//                 "next_grant": nextGrantTotals,
+//                 "next_operating": nextOperatingTotals,
+//                 "next_total": nextTotals
+//             };
+// }
