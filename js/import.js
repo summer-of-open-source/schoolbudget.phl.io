@@ -138,7 +138,7 @@ function parseNestedCSV() {
             convertChildren(tree, null, null); //converts all objects stored in "children" properties to arrays
             main(tree); //calling main here to ensure data will be assembled when it runs
 
-            makeAdjustments(tree);
+            //makeAdjustments(tree);
             //runTests();
 
         });
