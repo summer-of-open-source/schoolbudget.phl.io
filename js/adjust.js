@@ -5,6 +5,8 @@
 
 /*******  Adjustment Variables  *********/
 
+//note: 1st query = extraction item, 2nd query = distribution item, exclusions apply to distribution items
+
 var miscAdjust1 = [ new Query("F21003", "F31620", "F49000", "5221", "code"), // Food Service > Allocated Costs
                     new Query("F21003", "F31620", "" , "", "code"), //Operating support group...
                     [   new Exclusion("code", "F41071", 2), 
@@ -35,7 +37,7 @@ var miscAdjust6 = [ new Query("F21005", "F31999", "F41073", "2519", "code"), // 
                     new Query("F21001", "F49021", "F49026", "", "code")];// Management & Budget Office function
 //distribute to: everything with FUNCTION F49026
 
-var gapClosingAmounts = [   new Query("F21004", "F31362", "F49992", "114A", "code"), // Budget Reductions - Instructional & Instructional Support
+var gapQueries = [   new Query("F21004", "F31362", "F49992", "114A", "code"), // Budget Reductions - Instructional & Instructional Support
                             new Query("F21004", "F31362", "F49995", "114C", "code"), // Budget Reductions - Operating Support
                             new Query("F21004", "F31362", "F49994", "114E", "code"), // Budget Reductions - Administration
                             new Query("F21004", "F31362", "F49991", "114B", "code"), // Budget Reductions - Pupil & Family Support
@@ -90,7 +92,9 @@ function extractLines(root, queries){
             //have to use long path because we're actually editing the tree here
             root["children"][path[0]]["children"][path[1]]["children"][path[2]]["children"].splice(path[3], 1);
         }
-        catch(e){}
+        catch(e){
+            console.log("caught");
+        }
     });
 
     return {    "curr_other": currentOtherTotals,
@@ -187,8 +191,8 @@ function makeAdjustments(root){
 
 //Gap Closing Amounts
 
-
-    closeGap(root, extractLines(root, gapClosingAmounts), gapDistributionSchools, gapDistributionAdministrative);
+    var testAmounts = extractLines(root, gapQueries);
+    closeGap(root, testAmounts, gapDistributionSchools, gapDistributionAdministrative);
 
 
 //Miscellaneous adjustments

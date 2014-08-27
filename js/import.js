@@ -137,18 +137,18 @@ function parseNestedCSV() {
         function(dataArray) {
             convertChildren(tree, null, null); //converts all objects stored in "children" properties to arrays
             main(tree); //calling main here to ensure data will be assembled when it runs
-
-            //makeAdjustments(tree);
+            makeAdjustments(tree);
             //runTests();
-
+            return tree;
         });
 
-    //this happens BEFORE everything in the callback!!
-    console.log("********  NESTED TREE  *******");
-    console.log(tree); 
     return tree;
+    //this happens BEFORE everything in the callback!!
 }
 
 tree = parseNestedCSV();
+
+// console.log("********  NESTED TREE  *******");
+// console.log(tree); 
 
 
