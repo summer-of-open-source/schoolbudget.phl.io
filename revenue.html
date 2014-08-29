@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>School District of Philadelphia: Revenue Data Visualizer</title>
+        <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="/css/revenue.css">
+        <meta property="og:title" content="School District of Philadelphia: Revenue Data Visualizer"/>
+        <meta property="og:url" content="http://sdp-budget.poplar.phl.io/sunburst"/>
+        <meta property="og:site_name" content="Code for Philly"/>
+        <meta property="og:description"content="A web-based visualization of the budget information released on the School District of Philadelphia's Open Data Initiative page." />
+        <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js"></script>
+        <script>
+          WebFont.load({
+            google: {
+              families: ['Fjalla One', 'Merriweather']
+            }
+          });
+        </script>
+    </head>
+    <body>
+        <!-- Google Tag Manager -->
+            <noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-K4G748"
+            height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+            <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-K4G748');</script>
+        <!-- End Google Tag Manager -->
+
+        <header id="budget-header">
+            
+                <ul class="nav nav-tabs">
+                <li><a href="../index.html">Budget</a></li>
+                <li class="active"><a href="../revenue.html">Revenue</a></li>
+                </ul>
+                
+            <h1>School District of Philadelphia Revenue</h1>
+            <div id="share-buttons">
+                <!-- Facebook -->
+                <a href="http://www.facebook.com/sharer.php?u=http://schoolbudget.phl.io/" target="_blank"><img src="http://www.simplesharebuttons.com/images/somacro/facebook.png" alt="Facebook" /></a>
+
+                <!-- Twitter -->
+                <a href="http://twitter.com/share?url=http://schoolbudget.phl.io/&text=School District of Philadelphia Budget Visualization" target="_blank"><img src="http://www.simplesharebuttons.com/images/somacro/twitter.png" alt="Twitter" /></a>
+
+                <!-- Google+ -->
+                <a href="https://plus.google.com/share?url=http://schoolbudget.phl.io/" target="_blank"><img src="http://www.simplesharebuttons.com/images/somacro/google.png" alt="Google" /></a>
+
+                <!-- Reddit -->
+                <a href="http://reddit.com/submit?url=http://schoolbudget.phl.io/&title=School District of Philadelphia Budget Visualization" target="_blank"><img src="http://www.simplesharebuttons.com/images/somacro/reddit.png" alt="Reddit" /></a>
+
+                <!-- LinkedIn -->
+                <a href="http://www.linkedin.com/shareArticle?mini=true&url=http://schoolbudget.phl.io/" target="_blank"><img src="http://www.simplesharebuttons.com/images/somacro/linkedin.png" alt="LinkedIn" /></a>
+
+                <!-- Email -->
+                <a href="mailto:?Subject=School District Budget&Body=School%20District%20Budget%20Visualization%20 http://schoolbudget.phl.io/"><img src="http://www.simplesharebuttons.com/images/somacro/email.png" alt="Email" /></a>
+            </div>
+        </header>
+
+        <div id="container" class="clearfix">
+            <div id="chart"></div>
+            <div id="key"></div> 
+            <div id="note">Note: Undistributed budgetary adjustments and gap closing reductions are distributed for the purposes of this chart. <br><br> Source: <a href="http://webgui.phila.k12.pa.us/offices/o/open-data-initiative">SDP Open Data Initiative</a></div>
+         </div>
+
+            <div id="credits">
+                <p>Created by <a href="https://twitter.com/ash_respicio" target="_blank">Ashleigh Respicio</a> &amp; <a href="https://twitter.com/theresnobox" target="_blank">Kristi Centinaro</a> | a <a href="http://codeforphilly.org/projects/sdp_online_budget_visualization" target="_blank">Code for Philly</a> &  <a href="https://github.com/summer-of-open-source" target="_blank">GDI: Summer of Open Source</a> project</p>
+            </div>
+        </div>
+        <!-- <div id="sidebar">
+
+            <ul id="legend"></ul>
+            <p class="note">Note: Undistributed budgetary adjustments and gap closing reductions are distributed for the purposes of this chart. <br><br> Source: <a href="http://webgui.phila.k12.pa.us/offices/o/open-data-initiative">SDP Open Data Initiative</a></p>
+        </div> -->
+        
+        <script type="text/javascript" src="/js/jquery-2.1.1.js"></script>
+        <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="/js/d3.js"></script>
+        <script type="text/javascript" src="/js/numeral.js"></script>
+        <script type="text/javascript" src="/js/sunburst_rev.js"></script>
+    </body>
+</html>

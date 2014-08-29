@@ -21,6 +21,11 @@ h3 {
     font-weight: bold;
 }
 
+.nav-tabs {
+    font-size: 16px;
+    font-family: 'Fjalla One', sans-serif;
+}
+
 a:link,
 a:active,
 a:visited,

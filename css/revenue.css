@@ -1,0 +1,110 @@
+
+
+body{
+	font-family: 'Fjalla One', sans-serif;
+	font-size: 16px;
+    font-weight: 400;
+    color: #666666;
+    background-color: #fff;
+    width: 960px;
+    height: 700px;
+    margin: 10px 0 0 30px;
+}
+
+h1,h2,h3,h4,h5{
+	font-family: 'Merriweather', serif;
+}
+
+.budget-header{
+	width: 100%;
+}
+
+#budget-header h1{
+    font-family: 'Fjalla One', sans-serif;
+    font-size: 60px;
+    font-weight: 400;
+    color: #666666;
+}
+
+#share-buttons {
+    width: 200px;
+    padding-bottom: 50px;
+    display: block;
+    text-align: center;
+    float: right;
+}
+
+#share-buttons img {
+    width: 23px;
+    padding: 3px;
+    border: 0;
+    box-shadow: 0;
+    display: inline;
+}
+
+
+#container{
+	margin: 0 auto;
+	max-width: 800px;
+}
+
+.clearfix:after {
+  content: "";
+  display: table; 
+  clear: both; 
+}
+
+#chart, #key{
+	float: left;
+	min-height: 200px;
+	min-width: 200px;
+}
+
+#key{
+	margin-top: 120px;
+	float: right;
+}
+
+.key-item {
+	padding: 10px;
+	margin-left: 30px;
+	color: #fff;
+	text-align: center;
+	margin-bottom: 10px;
+}
+
+#key {
+    font-size: .8em;
+    padding: 10px;
+    line-height: 15px;
+}
+
+#note{
+	width: 200px;
+	float: right;
+	margin-right: 100px;
+}
+
+.key-item,
+.item-value,
+.name,
+.revenue {
+  -webkit-transition: all 0.3s ease-out;
+  		  transition: all 0.3s ease-out;
+}
+
+.hidden {
+	display: none;
+}
+
+#credits {
+    clear: both;
+    text-align: center;
+    text-decoration: none;
+    font-family: 'Merriweather', serif;
+    font-size: .9em;
+    color: #999;
+    padding: 30px 0 50px 0; 
+}
+
+
