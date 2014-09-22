@@ -62,8 +62,15 @@ function Datum(index0, index1, index2, index3, root){
 // at level three, it calls itself one last time to add nested elements (children of cuttent/next)
 Datum.prototype._initializeDatumProperties = function(propName, array, index){
     this[propName][index] = array[this[index]][propName];
+    testInitDatumProperties();
     if (index < 3) //if this is the lowest level, then these properties are  "current", and "next", and both have nested children
         this._initializeDatumProperties(propName, array[this[index]]["children"], index+1); //this adds those children
+
+    //to test datum._initializeDatumProperties
+    function testInitDatumProperties(){
+        console.log("propName: " + propName + "      index: " + index + "     array at index: ");
+        console.log(array);
+    }
 }
 
 //iterate through all 4 levels of root, and change the property "propName" to its equivalent in Datum.
@@ -294,54 +301,3 @@ function exclude(paths, exclusion){
     paths = condenseArray(paths); //condensing sparse array
     return paths;
 }
-
-// this method removes lines matching the supplied conditions and returns their totals
-// criteria is a query object which may have empty values at properties 0 - 3 and below
-// if, for example, the value at index 2 is blank, all nested elements with that value will be totaled and removed
-// function extractLines(root, criteria){
-//     var currentGrantTotals = 0, currentOperatingTotals = 0, currentTotals = 0, currentOtherTotals = 0, currentCapitalTotals = 0;
-//     var nextGrantTotals = 0, nextOperatingTotals = 0, nextTotals = 0, nextOtherTotals = 0, nextCapitalTotals = 0;
-//     var path, datum; 
-
-//     if (!Array.isArray(criteria)){//makes it possible to pass criteria as an array, or if there's only one, as a single arg
-//         criteria = [criteria]
-//     }
-
-//     criteria.forEach(function(value, index, array){ //first pass - collecting totals
-//         //path = findDatum(root, array[index]);
-//         datum = findDatum(root, array[index]);
-
-//         currentCapitalTotals += datum["current"][3]["capital"];
-//         currentOtherTotals += datum["current"][3]["other"];
-//         currentGrantTotals += datum["current"][3]["grant"];
-//         currentOperatingTotals += datum["current"][3]["operating"];
-//         currentTotals += datum["current"][3]["total"];
-
-//         nextCapitalTotals += datum["current"][3]["capital"];
-//         nextOtherTotals += datum["current"][3]["other"];
-//         nextGrantTotals += datum["next"][3]["grant"];
-//         nextOperatingTotals += datum["next"][3]["operating"];
-//         nextTotals += datum["next"][3]["total"];
-//     });
-    
-//     criteria.forEach(function(value, index, array){ //second pass - removing properties
-//         try{//because node may've been deleted already
-//             path = findPath(root, array[index]);
-//             //have to use long path because we're actually editing the tree here
-//             root["children"][path[0]]["children"][path[1]]["children"][path[2]]["children"].splice(path[3], 1);
-//         }
-//         catch(e){}
-//     });
-
-//     return {    "curr_other": currentOtherTotals,
-//                 "curr_capital": currentCapitalTotals,
-//                 "curr_grant": currentGrantTotals,
-//                 "curr_operating": currentOperatingTotals,
-//                 "curr_total": currentTotals,
-//                 "next_other": nextOtherTotals,
-//                 "next_capital": nextCapitalTotals,
-//                 "next_grant": nextGrantTotals,
-//                 "next_operating": nextOperatingTotals,
-//                 "next_total": nextTotals
-//             };
-// }

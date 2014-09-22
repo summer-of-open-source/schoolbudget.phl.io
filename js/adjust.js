@@ -127,8 +127,7 @@ function distributeAmounts(root, amounts, toDistribute, exclusions){
         totals[key] = 0;
         newTotals[key] = 0;
     });
-
-    // first pass through target lines -- sum existing amounts
+ // first pass through target lines -- sum existing amounts
    distributionDatums.forEach(function(datum, index, array){//for each distribution datum
         keys.forEach(function(key, index, array){//for each key
             if (key.indexOf("next") > 0)
@@ -194,7 +193,6 @@ function makeAdjustments(root){
     var testAmounts = extractLines(root, gapQueries);
     closeGap(root, testAmounts, gapDistributionSchools, gapDistributionAdministrative);
 
-
 //Miscellaneous adjustments
 
     distributeAmounts(root, extractLines(root, miscAdjust1[0]), miscAdjust1[1], miscAdjust1[2]);
@@ -208,5 +206,7 @@ function makeAdjustments(root){
     distributeAmounts(root, extractLines(root, miscAdjust5[0]), miscAdjust5[1]);
 
     distributeAmounts(root, extractLines(root, miscAdjust6[0]), miscAdjust6[1]);
+
+
 }
 
