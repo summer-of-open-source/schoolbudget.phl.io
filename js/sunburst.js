@@ -76,6 +76,7 @@ function main (root){
 //        return (d.dx > 0.005); // 0.005 radians = 0.29 degrees
 //    });
 
+
     var path = vis.data([root]).selectAll("path")
         .data(partition) //value of partition is a function.  See above.
         .enter().append("svg:path")
