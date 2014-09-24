@@ -1,4 +1,6 @@
 
+var tree; 
+
 /************************************************/
 /************ Nested CSV Formatter **************/
 /************************************************/
@@ -228,5 +230,5 @@ function parseCSV() {
     //this happens BEFORE everything in the callback!!
 }
 
-var tree = parseCSV();
+tree = parseCSV();
 
