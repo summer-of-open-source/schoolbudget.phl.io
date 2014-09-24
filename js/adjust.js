@@ -1,110 +1,189 @@
-/**************  php  **************/
-
-        // extract gap closing cuts and undistributed budgetary adjustments
-    $gapClosingAmounts = $extractLines([
-        ['Function' => 'F49992', 'ActivityCode' => '114A']  // Budget Reductions - Instructional & Instructional Support
-        ,['Function' => 'F49995', 'ActivityCode' => '114C'] // Budget Reductions - Operating Support
-        ,['Function' => 'F49994', 'ActivityCode' => '114E'] // Budget Reductions - Administration
-        ,['Function' => 'F49991', 'ActivityCode' => '114B'] // Budget Reductions - Pupil & Family Support
-        ,['Function' => 'F41073', 'ActivityCode' => '5999'] // Undistributed Budgetary Adjustments - Other
-        ,['Function' => 'F41073', 'ActivityCode' => '5221'] // Undistributed Budgetary Adjustments - Other
-        ,['Function' => 'F41073', 'ActivityCode' => '5130'] // Undistributed Budgetary Adjustments - Other
-        ,['Function' => 'F41073', 'ActivityCode' => '2817'] // Undistributed Budgetary Adjustments - Other
-    ]);
-
-
-        // distribute split amounts
-    $distributeAmounts($gapClosingAmountsSchools, [
-        ['FunctionGroup' => 'F31330']   // District Operated Schools - Instructional
-        ,['FunctionGroup' => 'F31350']  // District Operated Schools - Instructional Support
-        ,['FunctionGroup' => 'F31620', 'Function != "F41038"']  // District Operated Schools - Operational Support
-        ,['FunctionGroup' => 'F31360']  // District Operated Schools - Pupil - Family Support
-    ]);
-
-    $distributeAmounts($gapClosingAmountsAdministrative, [
-        ['FunctionClass' => 'F21001'] // Administrative Support Operations
-    ]);
-
-
-
-
-    // misc distributions
-    $distributeAmounts(
-        $extractLines(['Function' => 'F49000', 'ActivityCode' => '5221']) // Food Service > Allocated Costs
-        ,['FunctionGroup' => 'F31620', '(Function != "F41071" OR ActivityCode != "5221")', 'Function != "F41038"'] // Operating Support group, except Transportation -- Regular Services > Allocated Costs and Debt Service
-    );
-
-    $distributeAmounts(
-        $extractLines(['Function' => 'F41071', 'ActivityCode' => '5221']) // Transportation -- Regular Services > Allocated Costs
-        ,['Function' => 'F41071', 'ActivityCode != "5221"'] // Transportation -- Regular Services, except Allocated Costs
-    );
-
-    $distributeAmounts(
-        $extractLines(['Function' => 'F41073', 'ActivityCode' => '2515']) // Undistributed Budgetary Adjustments - Other > ACCOUNTING SERVICES
-        ,['Function' => 'F49027'] // Accounting & Audit Coordination
-    );
-
-    $distributeAmounts(
-        $extractLines(['Function' => 'F41073', 'ActivityCode' => '2520']) // Undistributed Budgetary Adjustments - Other > CITY CONTROLLER
-        ,['Function' => 'F41099'] // Financial Services Function
-    );
-
-    $distributeAmounts(
-        $extractLines(['Function' => 'F41073', 'ActivityCode' => '2512']) // Undistributed Budgetary Adjustments - Other > OFFICE OF MANAGEMENT & BUDGET
-        ,['Function' => 'F49026'] // Management & Budget Office function
-    );
-
-    $distributeAmounts(
-        $extractLines(['Function' => 'F41073', 'ActivityCode' => '2519']) // Undistributed Budgetary Adjustments - Other > OFFICE OF MANAGEMENT & BUDGET
-        ,['Function' => 'F49026'] // Management & Budget Office function
-    );
-
 /******** adjust.js *********/
 
 
 var adjuster = {
 
-    makeAdjustments = function(root){
+    //datums whose values will be removed and distributed to gapDistribution datums
 
-        //Gap Closing Amounts
+    gapClosingAmounts:[  this.getCompareFunc(function(d){ // Budget Reductions - Instructional & Instructional Support
+                            return (d["Function"] === "F49992" && d["ActivityCode"] === "114A");
+                        }),  
+                         this.getCompareFunc(function(d){ // Budget Reductions - Operating Support
+                            return (d["Function"] === "F49995" && d["ActivityCode"] === "114C");
+                        }), 
+                         this.getCompareFunc(function(d){ // Budget Reductions - Administration
+                            return (d["Function"] === "F49994" && d["ActivityCode"] === "114E");
+                        }),
+                         this.getCompareFunc(function(d){ // Budget Reductions - Pupil & Family Support
+                            return (d["Function"] === "F49991" && d["ActivityCode"] === "114B");
+                        }), 
+                         this.getCompareFunc(function(d){ // Undistributed Budgetary Adjustments - Other
+                            return (d["Function"] === "F41073" && d["ActivityCode"] === "5999");
+                         }),
+                         this.getCompareFunc(function(d){ // Undistributed Budgetary Adjustments - Other
+                            return (d["Function"] === "F41073" && d["ActivityCode"] === "5221");
+                         }),
+                         this.getCompareFunc(function(d){ // Undistributed Budgetary Adjustments - Other
+                            return (d["Function"] === "F41073" && d["ActivityCode"] === "5130");
+                         }),
+                         this.getCompareFunc(function(d){ // Undistributed Budgetary Adjustments - Other
+                            return (d["Function"] === "F41073" && d["ActivityCode"] === "2817");
+                         })
+   ],
 
-        var testAmounts = extractLines(root, gapQueries);
-        closeGap(root, testAmounts, gapDistributionSchools, gapDistributionAdministrative);
 
-        //Miscellaneous adjustments
+    //the datums that will receive the distributed data from gapCosingAmounts 
+    gapDistributionSchools:[
+                         this.getCompareFunc(function(d){ // District Operated Schools - Instructional
+                                return (d["FunctionGroup"] === "F31330");
+                         }),   
+                         this.getCompareFunc(function(d){// District Operated Schools - Instructional Support
+                                return (d["FunctionGroup"] === "F31350");
+                         }),
+                         this.getCompareFunc(function(d){ // District Operated Schools - Operational Support
+                                return (d["FunctionGroup"] === "F31620" && d["Function"] !== "F41038");
+                         }),
+                         this.getCompareFunc(function(d){ // District Operated Schools - Pupil - Family Support
+                                return (d["FunctionGroup"] === "F31360");
+                         })],
 
-        distributeAmounts(root, extractLines(root, miscAdjust1[0]), miscAdjust1[1], miscAdjust1[2]);
+    gapDistributionAdministrative:[
+                         this.getCompareFunc(function(d){ //distribute to all datums with a FunctionClass of F21001
+                                return (d["FunctionClass"] === "F21001");
+                         })], 
 
-        distributeAmounts(root, extractLines(root, miscAdjust2[0]), miscAdjust2[1], miscAdjust2[2]);
 
-        distributeAmounts(root, extractLines(root, miscAdjust3[0]), miscAdjust3[1]);
+    // misc distributions
 
-        distributeAmounts(root, extractLines(root, miscAdjust4[0]), miscAdjust4[1]);
+    miscDistribution1: {
+        extract: this.getCompareFunc(function(d){ // Food Service > Allocated Costs
+            return (d["Function"] === "F49000" && d["ActivityCode"] === "5221");
+        }),
+        distribute: this.getCompareFunc(function(d){ // Operating Support group, except Transportation -- Regular Services > Allocated Costs and Debt Service
+            return (d["FunctionGroup"] != "F31620"  &&  (d["Function"] != "F41071" || d["ActivityCode"] != "5221") && d["Function"] != "F41038");
+        })
+    },
+               
 
-        distributeAmounts(root, extractLines(root, miscAdjust5[0]), miscAdjust5[1]);
-
-        distributeAmounts(root, extractLines(root, miscAdjust6[0]), miscAdjust6[1]);
-
+    miscDistribution2: {
+        extract: this.getCompareFunc(function(d){ // Transportation -- Regular Services > Allocated Costs
+            return (d["Function"] === "F41071" && d["ActivityCode"] === "5221");
+        }),
+        distribute: this.getCompareFunc(function(d){ // Transportation -- Regular Services, except Allocated Costs
+            return (d["Function"] === "F49027");
+        })
     },
 
-    // this method removes lines matching the supplied conditions and returns their totals
-    // query object represents lines to extract.  May have empty values at properties 0 - 3 and below
-    // if, for example, the value at index 2 is blank, all nested elements with that value will be totaled and removed
-    extractLines = function(){
 
+    miscDistribution3: {
+        extract: this.getCompareFunc(function(d){ // Undistributed Budgetary Adjustments - Other > ACCOUNTING SERVICES
+            return (d["Function"] === "F41073" && d["ActivityCode"] === "2515");
+        }),
+        distribute: this.getCompareFunc(function(d){ // Accounting & Audit Coordination
+            return (d["Function"] === "F49027");
+        })
+    },
+
+    miscDistribution4: {
+        extract: this.getCompareFunc(function(d){ // Undistributed Budgetary Adjustments - Other > CITY CONTROLLER
+            return (d["Function"] === "F41073" && d["ActivityCode"] === "2520");
+        }),
+        distribute: this.getCompareFunc(function(d){ // Financial Services Function
+            return (d["Function"] === "F41099");
+        })
+    },
+
+    miscDistribution5: {
+        extract: this.getCompareFunc(function(d){ // Undistributed Budgetary Adjustments - Other > OFFICE OF MANAGEMENT & BUDGET
+            return (d["Function"] === "F41073" && d["ActivityCode"] === "2512");
+        }),
+        distribute: this.getCompareFunc(function(d){ // Management & Budget Office function
+            return (d["Function"] === "F49026");
+        })
+    },
+
+    miscDistribution6: {
+        extract: this.getCompareFunc(function(d){ // Undistributed Budgetary Adjustments - Other > OFFICE OF MANAGEMENT & BUDGET
+            return (d["Function"] === "F41073" && d["ActivityCode"] === "2519");
+        }),
+        distribute: this.getCompareFunc(function(d){ // Management & Budget Office function
+            return (d["Function"] === "F49026");
+        })
+    },
+
+    //returns a function that uses a custom anonymous func 
+    //allows for handling of more complex 
+    getCompareFunc: function(comparator){
+        return function(d){
+            return comparator(d);
+        }
+    },
+
+    extractLines: function(normalizedData, queries){
+        var totals = {  "CurrentCapital": 0, 
+                        "CurrentOperating": 0, 
+                        "CurrentGrant": 0, 
+                        "CurrentOther": 0,
+                        "CurrentTotal": 0,
+                        "ProposedCapital": 0,
+                        "ProposedOperating": 0,
+                        "ProposedGrant": 0,
+                        "ProposedOther": 0,
+                        "ProposedTotal": 0
+            };
+        
+        if (!Array.isArray(queries)){ //makes it possible to pass queries as an array, or if there's only one, as a single arg
+            queries = [queries];
+        }
+
+        //first pass - collecting totals
+        queries.forEach(function(query, index, array){     //iterate each query in the list
+            normalizedData.forEach(function(d, index, array){   //iterate each element in the normalizedData and compare using the query func.  
+                //if Query func returns true, add datum's totals to running totals
+                if (query(d)){
+                    totals.CurrentCapital += d["CurrentCapital"];
+                    totals.CurrentOther += d["CurrentOther"];
+                    totals.CurrentGrant += d["CurrentGrant"];
+                    totals.CurrentOperating += d["CurrentOperating"];
+                    totals.CurrentTotal += d["CurrentTotal"];
+
+                    totals.ProposedCapital += d["ProposedCapital"];
+                    totals.ProposedOther += d["ProposedOther"];
+                    totals.ProposedGrant += d["ProposedGrant"];
+                    totals.ProposedOperating += d["ProposedOperating"];
+                    totals.ProposedTotal += d["ProposedTotal"];
+
+                    normalizedData.splice(index, 1);
+                    index--;
+                }
+            });
+        });
+
+        // queries.forEach(function(query, index, array){ //second pass - removing properties
+        //     normalizedData.forEach(function(d, index, array){ 
+        //         try{//because node may've been deleted already
+        //             if()
+        //             //have to use long path because we're actually editing the tree here
+        //             root["children"][path[0]]["children"][path[1]]["children"][path[2]]["children"].splice(path[3], 1);
+        //         }
+        //         catch(e){
+        //             console.log("caught");
+        //         }
+        //     });
+        // });
+
+        return totals;
     },
 
     // proportionally distributes amounts among lines matching the supplied conditions
-    distributeAmounts = function(){
+    distributeAmounts: function(){
 
+    },
+
+    makeAdjustments: function(root){
     }
 
 };
-
-
-
-
-
 
 
 
