@@ -216,17 +216,20 @@ function parseCSV() {
         function(dataArray) {
              console.log(normalizedData);
 
-        //  makeAdjustments(normalizedData);   
+             //makes adjustments to data as per School District Request
+             adjuster.makeAdjustments(normalizedData);
 
+             //converts adjusted data to nested format. 
             nestedData = nestedFormatter.convertToNested(normalizedData); 
             console.log(nestedData);
 
+            //passes nested data to d3, which creates the graph
             main(nestedData);
 
             return nestedData;
         });
 
-    //return tree;
+    return tree;
     //this happens BEFORE everything in the callback!!
 }
 
