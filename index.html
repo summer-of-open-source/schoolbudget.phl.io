@@ -3,7 +3,6 @@
     <head>
         <meta charset="utf-8">
         <title>School District of Philadelphia: Budget Data Visualizer</title>
-        <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="css/sunburst.css">
         <meta property="og:title" content="School District of Philadelphia: Budget Data Visualizer"/>
         <meta property="og:url" content="http://sdp-budget.poplar.phl.io/sunburst"/>
@@ -32,32 +31,7 @@
         <!-- End Google Tag Manager -->
 
         <header id="budget-header" style="visibility: hidden">
-
-                <ul class="nav nav-tabs">
-                <li class="active"><a href="../index.html">Budget</a></li>
-                <li><a href="../revenue.html">Revenue</a></li>
-                </ul>
-
             <h1 id="headline"></h1>
-            <div id="share-buttons">
-                <!-- Facebook -->
-                <a href="http://www.facebook.com/sharer.php?u=http://schoolbudget.phl.io/"><img src="http://www.simplesharebuttons.com/images/somacro/facebook.png" alt="Facebook"</a>
-
-                <!-- Twitter -->
-                <a href="http://twitter.com/share?url=http://schoolbudget.phl.io/&text=School District of Philadelphia Budget Visualization" ><img src="http://www.simplesharebuttons.com/images/somacro/twitter.png" alt="Twitter"</a>
-
-                <!-- Google+ -->
-                <a href="https://plus.google.com/share?url=http://schoolbudget.phl.io/"><img src="http://www.simplesharebuttons.com/images/somacro/google.png" alt="Google"</a>
-
-                <!-- Reddit -->
-                <a href="http://reddit.com/submit?url=http://schoolbudget.phl.io/&title=School District of Philadelphia Budget Visualization"><img src="http://www.simplesharebuttons.com/images/somacro/reddit.png" alt="Reddit"</a>
-
-                <!-- LinkedIn -->
-                <a href="http://www.linkedin.com/shareArticle?mini=true&url=http://schoolbudget.phl.io/"><img src="http://www.simplesharebuttons.com/images/somacro/linkedin.png" alt="LinkedIn"</a>
-
-                <!-- Email -->
-                <a href="mailto:?Subject=School District Budget&Body=School%20District%20Budget%20Visualization%20 http://schoolbudget.phl.io/"><img src="http://www.simplesharebuttons.com/images/somacro/email.png" alt="Email" /></a>
-            </div>
             <form>
                 <div>
                     <span class="year-label">Estimated <span id="yearCurrent"></span> budget:</span>
@@ -78,6 +52,9 @@
             </form>
         </header>
 
+        <div id="sidebar">
+            <ul id="legend"></ul>
+        </div>
         <div id="main">
             <div id="sequence"><ul class="crumbs"></ul><span class="total"></span></div>
             <div id="chart">
@@ -87,17 +64,34 @@
                     <div id="category"></div>
                 </div>
             </div>
+
+            <p class="note">Note: Undistributed budgetary adjustments and gap closing reductions are distributed for the purposes of this chart. <br><br> Source: <a href="http://webgui.phila.k12.pa.us/offices/o/open-data-initiative">SDP Open Data Initiative</a></p>          
+        </div>
+
+        <div id="footer">
+            <div id="share-buttons">
+                <!-- Facebook -->
+                <a href="http://www.facebook.com/sharer.php?u=http://schoolbudget.phl.io/" target="_blank"><img src="http://www.simplesharebuttons.com/images/somacro/facebook.png" alt="Facebook" /></a>
+
+                <!-- Twitter -->
+                <a href="http://twitter.com/share?url=http://schoolbudget.phl.io/&text=School District of Philadelphia Budget Visualization" target="_blank"><img src="http://www.simplesharebuttons.com/images/somacro/twitter.png" alt="Twitter" /></a>
+
+                <!-- Google+ -->
+                <a href="https://plus.google.com/share?url=http://schoolbudget.phl.io/" target="_blank"><img src="http://www.simplesharebuttons.com/images/somacro/google.png" alt="Google" /></a>
+
+                <!-- Reddit -->
+                <a href="http://reddit.com/submit?url=http://schoolbudget.phl.io/&title=School District of Philadelphia Budget Visualization" target="_blank"><img src="http://www.simplesharebuttons.com/images/somacro/reddit.png" alt="Reddit" /></a>
+
+                <!-- LinkedIn -->
+                <a href="http://www.linkedin.com/shareArticle?mini=true&url=http://schoolbudget.phl.io/" target="_blank"><img src="http://www.simplesharebuttons.com/images/somacro/linkedin.png" alt="LinkedIn" /></a>
+
+                <!-- Email -->
+                <a href="mailto:?Subject=School District Budget&Body=School%20District%20Budget%20Visualization%20 http://schoolbudget.phl.io/"><img src="http://www.simplesharebuttons.com/images/somacro/email.png" alt="Email" /></a>
+            </div>
             <div id="credits">
-                <a href="contributors.html">Project Contributors</a>
+                <p>Created by <a href="https://twitter.com/themightychris" target="_blank">Chris Alfano</a> &amp; <a href="https://twitter.com/laurenancona" target="_blank">Lauren Ancona</a> | a <a href="http://codeforphilly.org/projects/sdp_online_budget_visualization" target="_blank">Code for Philly</a> project</p>
             </div>
         </div>
-        <div id="sidebar">
-
-            <ul id="legend"></ul>
-            <p class="note">Note: Undistributed budgetary adjustments and gap closing reductions are distributed for the purposes of this chart. <br><br> Source: <a href="http://webgui.phila.k12.pa.us/offices/o/open-data-initiative">SDP Open Data Initiative</a></p>
-        </div>
-        <script type="text/javascript" src="/js/jquery-2.1.1.js"></script>
-        <script type="text/javascript" src="/js/bootstrap.min.js"></script>
         <script src="js/d3.min.js"></script>
         <script src="js/sunburst.js"></script>
     </body>
