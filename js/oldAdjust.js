@@ -127,6 +127,7 @@ function distributeAmounts(root, amounts, toDistribute, exclusions){
         totals[key] = 0;
         newTotals[key] = 0;
     });
+    
  // first pass through target lines -- sum existing amounts
    distributionDatums.forEach(function(datum, index, array){//for each distribution datum
         keys.forEach(function(key, index, array){//for each key

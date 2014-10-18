@@ -153,20 +153,8 @@ var adjuster = {
             });
         });
 
-        // queries.forEach(function(query, index, array){ 
-        //     normalizedData.forEach(function(d, index, array){ 
-        //         try{//because node may've been deleted already
-        //             if()
-        //             //have to use long path because we're actually editing the tree here
-        //             root.splice(, 1);
-        //         }
-        //         catch(e){
-        //             console.log("caught");
-        //         }
-        //     });
-        // });
+        //note to self: the original php code had a 2-pass system going on... why is that?
 
-        // console.log(totals);
         return totals;
     },
 
@@ -180,7 +168,38 @@ var adjuster = {
     },
 
     // proportionally distributes amounts among lines matching the supplied conditions
-    distributeAmounts: function(){
+    // passes through totals array twice, once to sum totals, a second time to create the adjusted amount
+    distributeAmounts: function(extractedAmounts, distributionAmounts){
+        var proportion, defaultProportion = 1 / distributionAmounts.length;
+        var totals = {}, adjustedTotals = {};
+
+        //first pass through distributionAmounts.  sum existing totals.
+        extractedAmounts.forEach(function(amount, index, amounts){
+            amount.forEach(function(value, key){
+                if (totals[key])
+                    totals[key] += value;
+                else
+                    totals[key] = value;
+            });
+        });
+
+        //second pass.  Apply adjustments.  
+        distributionAmounts.forEach(function(distAmount, index, array){
+            totals.forEach(function(total, key){
+                //sets appropriate proportion
+                if(totals[key] !== 0){//condition from import.php (I think...)
+                    proportion = distAmount[key] / total;
+                }
+                else{
+                    proportion = defaultProportion;
+                }
+
+                distAmount[key] += (extractedAmounts[key] * proportion).toFixed(2);//rounds to 2 decimal places
+                adjustedTotals[key] += distAmount[key];
+            });
+        });
+
+        console.log(adjustedTotals.toString());
 
     },
 
@@ -205,9 +224,10 @@ var adjuster = {
 
     makeAdjustments: function(root){
         // gapClosingAmounts
-        this.extractLines(root, this.gapClosingAmountFuncs);
+        //this.distributeAmounts(this.extractLines(root, this.gapClosingAmountFuncs), gapDistributionAdministrative);
 
         //misc adjustments
+        // this.distributeAmounts(this.extractLines(root, this.miscDistribution1.extract), this.miscDistribution1.distribute); //not gonna work.  distribute prop is a func, not an array
         this.extractLines(root, this.miscDistribution1.extract);
         this.extractLines(root, this.miscDistribution2.extract);
         this.extractLines(root, this.miscDistribution3.extract);
