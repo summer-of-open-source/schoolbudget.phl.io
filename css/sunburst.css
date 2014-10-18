@@ -21,11 +21,6 @@ h3 {
     font-weight: bold;
 }
 
-.nav-tabs {
-    font-size: 16px;
-    font-family: 'Fjalla One', sans-serif;
-}
-
 a:link,
 a:active,
 a:visited,
@@ -49,10 +44,8 @@ form {
 
 #share-buttons {
     width: 200px;
-    padding-bottom: 50px;
     display: block;
-    text-align: center;
-    float: right;
+    text-align: left;
 }
 
 #share-buttons img {
@@ -65,12 +58,12 @@ form {
     
 #credits {
     clear: both;
-    text-align: center;
+    text-align: right;
     text-decoration: none;
     font-family: 'Merriweather', serif;
     font-size: .9em;
     color: #999;
-    padding: 30px 0 50px 0; 
+    padding: 0px 0 50px 0; 
 }
 
 #headline {
@@ -86,8 +79,13 @@ form {
 }
 
 #sidebar {
+    /* float: right; */
+    width: 100px; /* originally 200px */
+    /* the rest to mimic the share buttons */
+    padding-bottom: 50px;
+    display: block;
+    text-align: center;
     float: right;
-    width: 200px;
 }
 
 #sidebar .note {
@@ -165,9 +163,7 @@ form {
     line-height: 1.5em;
 }
 
-.contributors-list li{
-  background: url("arrow.png") 0 50% no-repeat;
-  list-style: none;
-  padding-left: 12px;
-  font-size: 4em;
+#footer {
+    float: left;
+    width: 960px;
 }
